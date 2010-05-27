@@ -2,8 +2,9 @@
   <class name="BCDataPoint" />
   <class name="BCDataSet" />
   <class name="BCLog" />
-  <class name="BCAux" />
   <class name="CrossSectionFinder" />
+  <function pattern="BCAux::*"/>
+
 <!--  <class name="" /> -->
 </lcgdict>
  
