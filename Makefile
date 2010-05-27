@@ -27,21 +27,31 @@ OBJECTS       = CrossSectionFinder.o
 all: lib project
 
 
-dictionary.cxx: selection.xml CrossSectionFinder.h
+dictionary.cxx: selection.xml Linkdef.h
+	@echo
 	@echo Generating dictionary 
-	genreflex CrossSectionFinder.h --deep $(ROOTINCS) $(BAT_INCS) -s selection.xml -o $@
-
+	@echo
+	genreflex Linkdef.h --deep $(ROOTINCS) $(BAT_INCS) -s selection.xml -o $@
+	@echo
 
 CrossSectionFinder.o: CrossSectionFinder.cpp CrossSectionFinder.h dictionary.cxx
 	$(CXX) $(CXXFLAGS) $(BAT_INCS) -c $< -o $@
+	@echo
 
 lib: dictionary.cxx CrossSectionFinder.o
+	@echo
+	@echo Generating library
+	@echo	
 	$(CXX) $(CXXFLAGS) -shared -Wl,-soname,libCrossSectionFinder CrossSectionFinder.h $(LIBS) $(BAT_LIBS) \
-	CrossSectionFinder.o dictionary.cxx -o libCrossSectionFinder.so
-
+	CrossSectionFinder.o dictionary.cxx -o libCrossSectionFinder.so	
+	@echo
 clean:
 	rm -f *~ *.o *.so *.o~ *.gch core dictionary.cxx
 
 project: $(OBJECTS) 
+	@echo
+	@echo Compiling executable
+	@echo
 	$(CXX) $(LDFLAGS) $(LIBS) $(OBJECTS) $(BAT_LIBS) runComBAT.cxx  -o runComBAT
+	@echo
 

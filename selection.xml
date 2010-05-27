@@ -1,3 +1,9 @@
 <lcgdict>
+  <class name="BCDataPoint" />
+  <class name="BCDataSet" />
+  <class name="BCLog" />
+  <class name="BCAux" />
   <class name="CrossSectionFinder" />
+<!--  <class name="" /> -->
 </lcgdict>
+ 
