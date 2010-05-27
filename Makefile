@@ -24,7 +24,7 @@ GLIBS         = $(ROOTGLIBS)
 SOURCES       = CrossSectionFinder.cpp runComBAT.cxx
 OBJECTS       = CrossSectionFinder.o 
 
-all: project
+all: lib project
 
 
 dictionary.cxx: selection.xml CrossSectionFinder.h
@@ -37,11 +37,11 @@ CrossSectionFinder.o: CrossSectionFinder.cpp CrossSectionFinder.h dictionary.cxx
 
 lib: dictionary.cxx CrossSectionFinder.o
 	$(CXX) $(CXXFLAGS) -shared -Wl,-soname,libCrossSectionFinder CrossSectionFinder.h $(LIBS) $(BAT_LIBS) \
-	CrossSectionFinder.o dictionary.cxx -o CrossSectionFinder.so
+	CrossSectionFinder.o dictionary.cxx -o libCrossSectionFinder.so
 
 clean:
 	rm -f *~ *.o *.so *.o~ *.gch core dictionary.cxx
 
-project: $(OBJECTS)
+project: $(OBJECTS) 
 	$(CXX) $(LDFLAGS) $(LIBS) $(OBJECTS) $(BAT_LIBS) runComBAT.cxx  -o runComBAT
 
