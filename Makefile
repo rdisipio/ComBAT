@@ -24,7 +24,7 @@ GLIBS         = $(ROOTGLIBS)
 SOURCES       = CrossSectionFinder.cpp runComBAT.cxx
 OBJECTS       = CrossSectionFinder.o 
 
-all: lib project
+all: libReflex project
 
 
 dictionary.cxx: selection.xml Linkdef.h
@@ -38,13 +38,23 @@ CrossSectionFinder.o: CrossSectionFinder.cpp CrossSectionFinder.h dictionary.cxx
 	$(CXX) $(CXXFLAGS) $(BAT_INCS) -c $< -o $@
 	@echo
 
-lib: dictionary.cxx CrossSectionFinder.o
+libReflex: dictionary.cxx CrossSectionFinder.o
 	@echo
-	@echo Generating library
+	@echo Generating library with Reflex
 	@echo	
 	$(CXX) $(CXXFLAGS) -shared -Wl,-soname,libCrossSectionFinder CrossSectionFinder.h $(LIBS) $(BAT_LIBS) \
 	CrossSectionFinder.o dictionary.cxx -o libCrossSectionFinder.so	
 	@echo
+
+lib: CrossSectionFinder.o
+	@echo
+	@echo Generating library
+	@echo
+	$(CXX) $(CXXFLAGS) -shared -Wl,-soname,libCrossSectionFinder CrossSectionFinder.h $(LIBS) $(BAT_LIBS) \
+     	CrossSectionFinder.o -o libCrossSectionFinder.so
+	@echo
+
+
 clean:
 	rm -f *~ *.o *.so *.o~ *.gch core dictionary.cxx
 

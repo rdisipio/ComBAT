@@ -6,5 +6,6 @@
 #include <BAT/BCAux.h>
 #include <BAT/BCDataSet.h> 
 #include <BAT/BCDataPoint.h> 
+#include <BAT/BCModel.h>
 
 #endif /* __LINKDEF__ **/

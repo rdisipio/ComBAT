@@ -10,13 +10,13 @@
 // ---------------------------------------------------------
 CrossSectionFinder::CrossSectionFinder() : BCModel()
 {  // default constructor
-	DefineParameters();
+  DefineParameters();
 };
 
 // ---------------------------------------------------------
 CrossSectionFinder::CrossSectionFinder(const char * name) : BCModel(name)
 {  // constructor
-	DefineParameters();
+  DefineParameters();
 };
 
 // ---------------------------------------------------------
@@ -34,6 +34,8 @@ void CrossSectionFinder::DefineParameters()
 
 //	this -> AddParameter("par1", 0.0, 1.0);   // index 0
 //	this -> AddParameter("par2", -7.0, 28.0); // index 1
+  AddParameter("R_B", 0.0, 5.0);
+
 }
 
 // ---------------------------------------------------------
@@ -43,6 +45,19 @@ double CrossSectionFinder::LogLikelihood(std::vector <double> parameters)
 	// p(data|parameters). This is where you have to define your model.
 
 	double logprob = 0.;
+
+	// get background measurement
+	double T = GetDataPoint(0)->GetValue(0);
+	double N1 = GetDataPoint(0)->GetValue(1);
+
+	// extract value of background rate
+	double R_B = parameters.at(0);
+
+	// calculate expected counts given background rate
+	double n_B = R_B * T;
+
+	// update likelihood
+	logprob += -n_B + N1 * log(n_B) - BCMath::LogFact(N1);
 
 	return logprob;
 }
@@ -56,8 +71,8 @@ double CrossSectionFinder::LogAPrioriProbability(std::vector <double> parameters
 	double logprob = 0.;
 
 	// For flat prior it's very easy.
-//	for(unsigned int i=0; i < this -> GetNParameters(); i++)
-//		logprob -= log(this -> GetParameter(i) -> GetRangeWidth());
+	for(unsigned int i=0; i < this -> GetNParameters(); i++)
+		logprob -= log(this -> GetParameter(i) -> GetRangeWidth());
 
 	return logprob;
 }

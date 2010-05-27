@@ -9,6 +9,8 @@
 #define __COUNTINGEXP__H
 
 #include <BAT/BCModel.h>
+#include <BAT/BCMath.h>
+
 
 // This is a CrossSectionFinder header file.
 // Model source code is located in file CrossSectionFinder/CrossSectionFinder.cxx
