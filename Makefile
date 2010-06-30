@@ -1,67 +1,119 @@
-ROOTCFLAGS    = $(shell root-config --cflags)
-#ROOTCFLAGS    = -pthread -m32
-ROOTLIBS      = $(shell root-config --libs)
-ROOTGLIBS     = #$(shell root-config --glibs)
-#ROOTINCS      = $(shell root-config --incdir)
+###################################################################
+# This Makefile was created using the ./CreateProject.sh script
+# for project ComBAT
+# ./CreateProject.sh is part of Bayesian Analysis Toolkit (BAT).
+# BAT can be downloaded from http://www.mppmu.mpg.de/bat
+###################################################################
+#
+# Run 'make' to compile the program and 'make clean' to remove
+# all compiled parts and 'clean' the directory.
+#
+# You might need to adjust the CFLAGS, LIBS, and GLIBS based on
+# the BAT installation on your system. Consult the gmake manual
+# for details.
+#
+###################################################################
 
-BAT_ROOT = $(HOME)/datanas/athena/15.6.9/external/BAT/0.3.2/i686-slc4-gcc34
-BAT_LIBS = -L$(BAT_ROOT)/lib -lBAT
-BAT_INCS = -I$(BAT_ROOT)/include
+# Root variables
+ROOTCFLAGS   := $(shell root-config --cflags)
+ROOTLIBS     := $(shell root-config --libs) -lMinuit
+ROOTGLIBS    := $(shell root-config --glibs)
 
-CXX           = g++ -m32
-CXXFLAGS      = -I$(ROOTINCS) -O2 -Wall -fPIC
-LD            = g++
-LDFLAGS       = #-g
-SOFLAGS       = -shared
+# compiler and flags
+CXX          = g++ -g
+CXXFLAGS     = -g -Wall -fPIC -Wno-deprecated -O2
+LD           = g++
+LDFLAGS      = -g -O2
+SOFLAGS      = -shared
 
-CXXFLAGS     += $(ROOTCFLAGS)
-LIBS          = $(BAT_LIBS) $(ROOTLIBS) -lMinuit -lReflex -lCintex
-GLIBS         = $(ROOTGLIBS)
+# standard commands
+RM           = rm -f
+MV           = mv
+ECHO         = echo
+CINT         = rootcint
 
-#PYTHONINCS    = -I$(HOME)/local/include/python2.5
-#PYTHONLIBS    = -L$(HOME)/local/lib/python2.5
+# add ROOT flags
+CXXFLAGS    += $(ROOTCFLAGS)
 
-SOURCES       = CrossSectionFinder.cpp runComBAT.cxx
-OBJECTS       = CrossSectionFinder.o 
+# ----------------------------------------------------------------------
+# The following definitions depend on the setup of the system where
+# the project is being compiled. If BAT is installed in the standard
+# system search path then the lines below are correct and the compilation
+# will work
+CXXFLAGS    += -I. -I./include
+LIBS        += $(ROOTLIBS)  -lBAT 
+GLIBS       += $(ROOTGLIBS) -lBAT 
 
-all: libReflex project
+# In case you see following errors during the compilation,
+#
+#   undefined reference to 'Divonne'
+#   undefined reference to 'Suave'
+#   undefined reference to 'Cuhre'
+#   undefined reference to 'Vegas'
+#
+# your version of BAT was installed with the Cuba support and you need
+# to adjust the Makefile by uncommenting the following lines. You might
+# also need to add the path to libcuba.a to the lines below
+# as -L/path/to/cuba/lib
+#
+LIBS        += -lcuba
+GLIBS       += -lcuba
+
+# If BAT was installed in a non-standard path (e.g. user home
+# directory) then one can specify the location of the header
+# files here (uncomment following lines and adjust the path in
+# BATINSTALLDIR):
+#
+# BATINSTALLDIR = '/path/to/bat/installation/directory'
+#BATINSTALLDIR="/home/disipio/local"
+#CXXFLAGS    += -I$(BATINSTALLDIR)/include
+#LIBS        += -L$(BATINSTALLDIR)/lib -lBAT
+#GLIBS       += -L$(BATINSTALLDIR)/lib -lBAT
+
+# List of all classes (models) used in the program
+# Add classes to the end. Baskslash indicates continuation
+# on the next line
+CXXSRCS      = \
+        ComBAT.cxx
+
+# ----------------------------------------------------------------------
+# don't change lines below unless you know what you're doing
+#
+
+CXXOBJS      = $(patsubst %.cxx,%.o,$(CXXSRCS))
+EXEOBJS      =
+MYPROGS     = \
+        runComBAT
+
+GARBAGE      = $(CXXOBJS) $(EXEOBJS) *.o *~ link.d $(MYPROGS)
 
 
-dictionary.cxx: selection.xml Linkdef.h
-	@echo
-	@echo Generating dictionary 
-	@echo
-	genreflex Linkdef.h --deep $(ROOTINCS) $(BAT_INCS) -s selection.xml -o $@
-	@echo
+# targets
+all : project
 
-CrossSectionFinder.o: CrossSectionFinder.cpp CrossSectionFinder.h dictionary.cxx
-	$(CXX) $(CXXFLAGS) $(BAT_INCS) -c $< -o $@
-	@echo
+link.d : $(patsubst %.cxx,%.h,$(CXXSRCS))
+	$(CXX) -MM $(CXXFLAGS) $(CXXSRCS) > link.d;
 
-libReflex: dictionary.cxx CrossSectionFinder.o
-	@echo
-	@echo Generating library with Reflex
-	@echo	
-	$(CXX) $(CXXFLAGS) -shared -Wl,-soname,libCrossSectionFinder CrossSectionFinder.h $(LIBS) $(BAT_LIBS) \
-	CrossSectionFinder.o dictionary.cxx -o libCrossSectionFinder.so	
-	@echo
+include link.d
 
-lib: CrossSectionFinder.o
-	@echo
-	@echo Generating library
-	@echo
-	$(CXX) $(CXXFLAGS) -shared -Wl,-soname,libCrossSectionFinder CrossSectionFinder.h $(LIBS) $(BAT_LIBS) \
-     	CrossSectionFinder.o -o libCrossSectionFinder.so
-	@echo
+%.o : %.cxx
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
+clean :
+	$(RM) $(GARBAGE)
 
-clean:
-	rm -f *~ *.o *.so *.o~ *.gch core dictionary.cxx
+project : runComBAT.cxx $(CXXOBJS)
+	$(CXX) $(CXXFLAGS) -c $<
+	$(CXX) $(LDFLAGS) $(LIBS) runComBAT.o $(CXXOBJS) -o runComBAT
 
-project: $(OBJECTS) 
-	@echo
-	@echo Compiling executable
-	@echo
-	$(CXX) $(LDFLAGS) $(LIBS) $(OBJECTS) $(BAT_LIBS) runComBAT.cxx  -o runComBAT
-	@echo
+print :
+	echo compiler  : $(CXX)
+	echo c++ srcs  : $(CXXSRCS)
+	echo c++ objs  : $(CXXOBJS)
+	echo c++ flags : $(CXXFLAGS)
+	echo libs      : $(LIBS)
+	echo so flags  : $(SOFLAGS)
+
+	echo rootlibs  : $(ROOTLIBS)
+	echo rootglibs : $(ROOTGLIBS)
 
