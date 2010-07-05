@@ -85,7 +85,7 @@ EXEOBJS      =
 MYPROGS     = \
         runComBAT
 
-GARBAGE      = $(CXXOBJS) $(EXEOBJS) *.o *~ link.d $(MYPROGS)
+GARBAGE      = $(CXXOBJS) $(EXEOBJS) *.o *~ link.d $(MYPROGS) ConfigFile/ConfigFile.o
 
 
 # targets
@@ -103,8 +103,8 @@ clean :
 	$(RM) $(GARBAGE)
 
 project : runComBAT.cxx $(CXXOBJS)
-	$(CXX) $(CXXFLAGS) -c $<
-	$(CXX) $(LDFLAGS) $(LIBS) runComBAT.o $(CXXOBJS) -o runComBAT
+	$(CXX) $(CXXFLAGS) -c runComBAT.cxx $(CXXOBJS) #$<
+	$(CXX) $(LDFLAGS) $(LIBS)  runComBAT.o $(CXXOBJS) -o runComBAT	
 
 print :
 	echo compiler  : $(CXX)

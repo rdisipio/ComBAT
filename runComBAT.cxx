@@ -5,19 +5,21 @@
 // BAT can be downloaded from http://www.mppmu.mpg.de/bat
 // ***************************************************************
 
+#include <string>
+
 #include <BAT/BCLog.h>
 #include <BAT/BCAux.h>
 #include <BAT/BCDataSet.h>
 #include <BAT/BCDataPoint.h>
 #include <BAT/BCH1D.h>
 
-#include "ComBAT.h"
-
 #include "commons.h"
+#include "ComBAT.h"
 
 int main( int argc, char *argv[] )
 {
-  const char* inFile = ( argc > 1 ) ? argv[1]  : "analysis_10TeV.txt" ;
+  const string dataFileName   = ( argc > 1 ) ? argv[1]  : "analysis_10TeV.txt" ;
+  const string configFileName = ( argc > 2 ) ? argv[2]  : "combat.ini" ;
   const unsigned int NParamsToRead = 6;
 
   // set nice style for drawing than the ROOT default
@@ -30,33 +32,13 @@ int main( int argc, char *argv[] )
 	// create new ComBAT object
 	ComBAT * m = new ComBAT();
 
-	// ele channel
-	//	BCDataPoint* ch_ele_0 = new BCDataPoint(5);
-	// ch_ele_0->SetValue( VAL::Nobs, 3260 );
-// 	ch_ele_0->SetValue( VAL::Nbkg,  1239 );
-// 	ch_ele_0->SetValue( VAL::eff_sig, 1703./21495. );
-// 	ch_ele_0->SetValue( VAL::eff_bkg, 1239./5261417. );
-// 	ch_ele_0->SetValue( VAL::iLumi, 99. );
-
-	// mu channel
-	//	BCDataPoint* ch_mu_0 = new BCDataPoint(5);
-	// ch_mu_0->SetValue( VAL::Nobs, 3374 );
-// 	ch_mu_0->SetValue( VAL::Nbkg,  1322 );
-// 	ch_mu_0->SetValue( VAL::eff_sig, 1831. / 21495. );
-// 	ch_mu_0->SetValue( VAL::eff_bkg, 1322. / 5261417. );
-// 	ch_mu_0->SetValue( VAL::iLumi, 99. );
-
-	// JES up	
-	// BCDataPoint* ch_ele_JES_up = new BCDataPoint(5);
-// 	ch_ele_0->SetValue( VAL::Nobs, 1746 );
-// 	ch_ele_0->SetValue( VAL::Nbkg,  820 );
-// 	ch_ele_0->SetValue( VAL::eff_sig, 0.99 );
-// 	ch_ele_0->SetValue( VAL::eff_bkg, 0.055 );
-// 	ch_ele_0->SetValue( VAL::iLumi, 99. );
+	m->SetCardFileName( configFileName );
+	m->DefineParameters();
 
 	// Add the data point to the data set
+	cout << "Reading data points from file" << endl;
         BCDataSet* dataSet = new BCDataSet(); 
-	dataSet->ReadDataFromFile( inFile, NParamsToRead );
+	dataSet->ReadDataFromFile( dataFileName.c_str(), NParamsToRead );
 
 	// dataSet->AddDataPoint( ch_ele_0 );
 	//dataSet->AddDataPoint( ch_mu_0 );
