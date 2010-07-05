@@ -18,9 +18,10 @@
 
 int main( int argc, char *argv[] )
 {
-  const string dataFileName   = ( argc > 1 ) ? argv[1]  : "analysis_10TeV.txt" ;
-  const string configFileName = ( argc > 2 ) ? argv[2]  : "combat.ini" ;
-  const unsigned int NParamsToRead = 6;
+  //const string dataFileName   = ( argc > 1 ) ? argv[1]  : "analysis_10TeV.txt" ;
+  //const string configFileName = ( argc > 2 ) ? argv[2]  : "combat.ini" ;
+  //const unsigned int NParamsToRead = 6;
+  const string configFileName = ( argc > 1 ) ? argv[1]  : "combat.bat" ;
 
   // set nice style for drawing than the ROOT default
 	BCAux::SetStyle();
@@ -36,14 +37,14 @@ int main( int argc, char *argv[] )
 	m->DefineParameters();
 
 	// Add the data point to the data set
-	cout << "Reading data points from file" << endl;
-        BCDataSet* dataSet = new BCDataSet(); 
-	dataSet->ReadDataFromFile( dataFileName.c_str(), NParamsToRead );
+	//cout << "Reading data points from file" << endl;
+        //BCDataSet* dataSet = new BCDataSet(); 
+	//dataSet->ReadDataFromFile( dataFileName.c_str(), NParamsToRead );
 
 	// dataSet->AddDataPoint( ch_ele_0 );
 	//dataSet->AddDataPoint( ch_mu_0 );
 	 
-	m->SetDataSet( dataSet );
+	//m->SetDataSet( dataSet );
 
 	BCLog::OutSummary("Test model created");
 

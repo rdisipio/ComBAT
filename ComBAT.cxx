@@ -9,6 +9,8 @@
 #include <fstream>
 
 #include <BAT/BCMath.h>
+#include <BAT/BCDataSet.h>
+#include <BAT/BCDataPoint.h>
 
 #include "ComBAT.h"
 
@@ -92,6 +94,8 @@ void ComBAT::DefineParameters()
 //	this -> AddParameter("par1", 0.0, 1.0);   // index 0
 //	this -> AddParameter("par2", -7.0, 28.0); // index 1
 
+  BCDataSet* dataSet = new BCDataSet();
+
   cout << "Opening cardfile " << m_cardFileName << endl;
   ifstream cardfile( m_cardFileName.c_str(), ifstream::in  );
   if( cardfile.is_open() ) {
@@ -125,7 +129,19 @@ void ComBAT::DefineParameters()
 	m_sigma[whichParam] = delta;
       }
       else if( token == "data" ) {
+	BCDataPoint * dp = new BCDataPoint( 6 );
+	
+	double Nobs, NsigMC, NbkgMC, eff_sig, eff_bkg, ilumi = 0.0;
+	cardfile >> Nobs >> NsigMC >> NbkgMC >> eff_sig >> eff_bkg >> ilumi;
 
+	dp->SetValue( 0, Nobs );
+	dp->SetValue( 1, NsigMC );
+	dp->SetValue( 2, NbkgMC );
+	dp->SetValue( 3, eff_sig );
+	dp->SetValue( 4, eff_bkg );
+	dp->SetValue( 5, ilumi );
+	dataSet->AddDataPoint( dp );
+	cout << "Data point " << Nobs << " " << NsigMC << " " << NbkgMC << " " << eff_sig << " " << eff_bkg << " " << ilumi << endl;
       }
       else if( token == "end" ) {
 	
@@ -138,6 +154,8 @@ void ComBAT::DefineParameters()
     } // next token
 
   } // file opened
+
+  SetDataSet( dataSet );
 
   cout << "End of configuration" << endl;
   cardfile.close();
