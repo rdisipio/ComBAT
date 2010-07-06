@@ -33,7 +33,11 @@ std::istream& operator>>( std::istream& is, Systematic& s )
 }
 
 
-
+double ComBAT::LogGamma( double x, double k = 1, double theta = 1)
+{
+  // gamma(x,k,theta) = pow(x, k-1) * exp( -1.* x / theta ) / ( pow(theta, k) * );
+  return (k-1)*x - x/theta - k*log(theta) - BCMath::ApproxLogFact(k);
+}
 
 // ---------------------------------------------------------
 ComBAT::ComBAT() : BCModel()
@@ -63,7 +67,7 @@ void ComBAT::AddSystematic( const Systematic& param )
   AddParameter( param.name.c_str(), param.lowerBound, param.upperBound ); 
   m_paramIndex[ param.name ] = m_N_systematics + m_N_params;
 
-  cout << "Added systematic " << m_N_systematics << " " << param.name << " between " << param.lowerBound << " / " << param.upperBound << endl;
+  cout << "Added systematic " << m_paramIndex[ param.name ] << " " << param.name << " between " << param.lowerBound << " / " << param.upperBound << endl;
 
   ++m_N_systematics; 
 }
@@ -74,7 +78,7 @@ void ComBAT::AddParam( const Systematic& param  )
   AddParameter( param.name.c_str(), param.lowerBound, param.upperBound ); 
   m_paramIndex[ param.name ] = m_N_systematics + m_N_params;
   
-  cout << "Added parameter " << m_N_params << " " << param.name << " between " << param.lowerBound << " / " << param.upperBound << endl;
+  cout << "Added parameter " << m_paramIndex[ param.name ] << " " << param.name << " between " << param.lowerBound << " / " << param.upperBound << endl;
   
   ++m_N_params; 
 }
@@ -170,54 +174,41 @@ double ComBAT::LogLikelihood(std::vector <double> parameters)
 
 	double logprob  = 0.;
 
-	param_t br      = 0.545;
+	param_t br      = 0.545;//no full had
 
-	// Get parameters
-	//param_t xsec_0        = parameters[m_paramIndex["xsec"]];
-	
-	//param_t eff_sig_ele_0 = parameters[m_paramIndex["eff_sig_el"]];
-	//param_t eff_sig_mu_0  = parameters[m_paramIndex["eff_sig_mu"]];
-
-	//systematics
-	// syst_t d_JES        = parameters[m_paramIndex["JES"]];
-// 	syst_t d_Wnorm      = parameters[m_paramIndex["Wnorm"]];
-// 	syst_t d_iLumi      = parameters[m_paramIndex["iLumi"]];
-// 	syst_t d_ISRFSR     = parameters[m_paramIndex["ISRFSR"]];
-// 	syst_t d_QCD        = parameters[m_paramIndex["QCD"]];
-// 	syst_t d_bTagging   = parameters[m_paramIndex["bTagging"]];
-// 	syst_t d_HFW        = parameters[m_paramIndex["HFW"]];
 
 
 	/////////////////////////////
 	// Likelihood
 	
-	const double xsec_0      = parameters[ m_paramIndex["xsec"] ];
+	const double xsec_0      = parameters[ 0 ]; //m_paramIndex["xsec"] ];
 
 	const double Nobs_ele    = GetDataPoint(DATAPOINT::ELE_0)->GetValue( VAL::Nobs );
-	const double Nbkg_ele    = GetDataPoint(DATAPOINT::ELE_0)->GetValue( VAL::Nbkg );
-	
-	//const double Nsig_ele    = Nobs_ele - Nbkg_ele;
-	const double Nsig_ele_MC = GetDataPoint(DATAPOINT::ELE_0)->GetValue( VAL::NsigMC );
+	const double Nbkg_ele    = GetDataPoint(DATAPOINT::ELE_0)->GetValue( VAL::Nbkg ) * ( 1 + CalculateTotalVariation("Nbkg_ele", parameters) );
+	//	const double Nsig_ele_MC = GetDataPoint(DATAPOINT::ELE_0)->GetValue( VAL::NsigMC );
 	const double eff_sig_ele = GetDataPoint(DATAPOINT::ELE_0)->GetValue( VAL::eff_sig ) * ( 1 + CalculateTotalVariation("eff_sig_ele", parameters) );
-
-	const double iLumi_ele_0 = GetDataPoint(DATAPOINT::ELE_0)->GetValue( VAL::iLumi ) * ( 1 + CalculateTotalVariation("iLumi", parameters) );
-	//double xsec_ele          = Nsig_ele / ( br * iLumi_ele_0 * eff_sig_ele ) ;
-	const double Nsig_ele    = xsec_0 * iLumi_ele_0 * br * eff_sig_ele;
+	const double iLumi_ele   = GetDataPoint(DATAPOINT::ELE_0)->GetValue( VAL::iLumi );// * ( 1 + CalculateTotalVariation("iLumi", parameters) );
+	const double Nsig_ele    = xsec_0 * iLumi_ele * br * eff_sig_ele;
 
 	const double Nobs_mu    = GetDataPoint(DATAPOINT::MU_0)->GetValue( VAL::Nobs );
-	const double Nbkg_mu    = GetDataPoint(DATAPOINT::MU_0)->GetValue( VAL::Nbkg );
-	//const double Nsig_mu    = Nobs_mu - Nbkg_mu;
-	const double Nsig_mu_MC = GetDataPoint(DATAPOINT::MU_0)->GetValue( VAL::NsigMC );
+	const double Nbkg_mu    = GetDataPoint(DATAPOINT::MU_0)->GetValue( VAL::Nbkg ) * ( 1 + CalculateTotalVariation("Nbkg_mu", parameters) );
+	//	const double Nsig_mu_MC = GetDataPoint(DATAPOINT::MU_0)->GetValue( VAL::NsigMC );
 	const double eff_sig_mu = GetDataPoint(DATAPOINT::MU_0)->GetValue( VAL::eff_sig ) * ( 1 + CalculateTotalVariation("eff_sig_mu", parameters) );
-	const double iLumi_mu_0 = GetDataPoint(DATAPOINT::MU_0)->GetValue( VAL::iLumi )  * ( 1 + CalculateTotalVariation("iLumi", parameters) );
-	//double xsec_mu          = Nsig_mu / ( br * iLumi_mu_0 * eff_sig_mu );
-	const double Nsig_mu    = xsec_0 * iLumi_mu_0 * br * eff_sig_mu;
+	const double iLumi_mu   = GetDataPoint(DATAPOINT::MU_0)->GetValue( VAL::iLumi );//  * ( 1 + CalculateTotalVariation("iLumi", parameters) );
+	const double Nsig_mu    = xsec_0 * iLumi_mu * br * eff_sig_mu;
+
 
 	// Poisson likelihood
-	logprob += BCMath::LogPoisson( Nobs_ele, Nsig_ele + Nbkg_ele );
-	logprob += BCMath::LogPoisson( Nobs_mu,  Nsig_mu + Nbkg_mu );
-	//logprob += BCMath::LogGaus( xsec_ele, xsec_0, sqrt( Nsig_ele_MC + Nbkg_ele) );
-	//logprob += BCMath::LogGaus( xsec_mu, xsec_0, sqrt( Nsig_ele_MC + Nbkg_ele)  );
+	const double mu_ele     = Nsig_ele + Nbkg_ele;
+	const double mu_mu      = Nsig_mu  + Nbkg_mu;
+	//logprob += BCMath::LogPoisson( Nobs_ele, Nsig_ele + Nbkg_ele );
+	//logprob += BCMath::LogPoisson( Nobs_mu,  Nsig_mu + Nbkg_mu );
+
+	logprob += log( mu_ele ) * Nobs_ele - mu_ele - BCMath::ApproxLogFact( int(Nobs_ele) );
+	logprob += log( mu_mu )  * Nobs_mu  - mu_mu  - BCMath::ApproxLogFact( int(Nobs_mu) );
+
+	//printf("Nobs_ele=%5.0f Nsig_ele=%5.0f Nbkg_ele=%5.0f mu_ele=%5.0f\n", Nobs_ele, Nsig_ele, Nbkg_ele, mu_ele );
+	//printf("Nobs_mu=%5.0f  Nsig_mu=%5.0f  Nbkg_mu=%5.0f  mu_mu=%5.0f logprob=%5.2f\n\n", Nobs_mu, Nsig_mu, Nbkg_mu, mu_mu, logprob );
 
 	return logprob;
 }
@@ -233,16 +224,11 @@ double ComBAT::LogAPrioriProbability(std::vector <double> parameters)
 	// For flat prior it's very easy.
 //	for(unsigned int i=0; i < this -> GetNParameters(); i++)
 	logprob -= log( GetParameter("xsec")->GetRangeWidth() ); // flat a priori on xs
-	logprob += BCMath::LogGaus( parameters[m_paramIndex["JES"]] );
-	logprob += BCMath::LogGaus( parameters[m_paramIndex["Wnorm"]] );
-	logprob += BCMath::LogGaus( parameters[m_paramIndex["ISRFSR"]] );
-	logprob += BCMath::LogGaus( parameters[m_paramIndex["QCD"]] );
-	logprob += BCMath::LogGaus( parameters[m_paramIndex["bTagging"]] );
-	logprob += BCMath::LogGaus( parameters[m_paramIndex["HFW"]] );
 
-	logprob += BCMath::LogGaus( parameters[m_paramIndex["eff_sig_ele"]] );
-	logprob += BCMath::LogGaus( parameters[m_paramIndex["eff_sig_mu"]] );
-	logprob += BCMath::LogGaus( parameters[m_paramIndex["iLumi"]] );
+	for( unsigned int s = 1 ; s <= parameters.size() ; ++s ) {
+	  logprob += BCMath::LogGaus( parameters[s] );
+	  //logprob += LogGamma( parameters[s] );
+	}
 
 
 	return logprob;
@@ -252,10 +238,14 @@ double ComBAT::LogAPrioriProbability(std::vector <double> parameters)
 
 double ComBAT::CalculateTotalVariation( const string& param, std::vector <double>& parameters )
 {
-  double v = 0.;
-
-  for( unsigned int s = 0 ; s < m_N_systematics ; ++s ) {
-    v += m_sigma[param][s] * parameters[s + m_N_params];
+  double v = 0.;// parameters[0];
+  //cout << param << ": ";
+  m_N_systematics = m_sigma.size();
+  for( unsigned int s = 0 ; s < 1 + m_N_systematics; ++s ) {
+    //const double sign = m_sigma[param][s] / fabs(m_sigma[param][s]);
+    //printf("%1.3f * %3.3f ; ",  m_sigma[param][s], parameters[ s + 1 ] );
+    v += m_sigma[param][s] * parameters[ s + 1 ]; //parameters[0] = sigma
   }
+  //cout << endl;
   return v;
 }
