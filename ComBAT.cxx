@@ -16,6 +16,47 @@
 
 #include "commons.h"
 
+////////////////////////////////////////////
+
+string TypeToString( const Systematic& s )
+{
+  string type = "";
+  switch( s.type ) {
+  case Unspecified:
+    type = "Unspecified";
+    break;
+  case Symmetric:
+    type = "Symmetric";
+    break;
+  case AsymmetricParabolic:
+    type = "Asymmetric with parabolic interpolation";
+    break;
+  case Asymmetric2HalfGaussian:
+    type = "Asymmetric with 2 half-gaussian interpolation";
+    break;
+  default:
+    type = "Error decoding type of systematic";
+    break;
+  }
+  return type;
+}
+
+////////////////////////////////////////////
+
+static void FitParabola(const double y1, const double y2, const double y3, double * a, double * b, double * c)
+{
+  const double x1 = -1.;
+  const double x2 = 0.;
+  const double x3 = 1.;
+
+  const double denom = (x1 - x2) * (x1 - x3) * (x2 - x3);
+  *a  = (x3 * (y2 - y1) + x2 * (y1 - y3) + x1 * (y3 - y2)) / denom;
+  *b  = (x3*x3 * (y1 - y2) + x2*x2 * (y3 - y1) + x1*x1 * (y2 - y3)) / denom;
+  *c  = (x2 * x3 * (x2 - x3) * y1 + x3 * x1 * (x3 - x1) * y2 + x1 * x2 * (x1 - x2) * y3) / denom;
+}
+
+
+////////////////////////////////////////////
 
 
 std::ostream& operator<<( std::ostream& os, const Systematic& s )
@@ -28,7 +69,7 @@ std::ostream& operator<<( std::ostream& os, const Systematic& s )
 std::istream& operator>>( std::istream& is, Systematic& s )
 {
   // load from is
-  is >> s.name >>  s.lowerBound >> s.upperBound;
+  is >> s.name >>  s.lowerBound >> s.upperBound;// >> type;
   return is;
 }
 
@@ -64,10 +105,13 @@ ComBAT::~ComBAT()
 
 void ComBAT::AddSystematic( const Systematic& param )
 {
+  m_systematics.push_back( param );
+
   AddParameter( param.name.c_str(), param.lowerBound, param.upperBound ); 
   m_paramIndex[ param.name ] = m_N_systematics + m_N_params;
 
-  cout << "Added systematic " << m_paramIndex[ param.name ] << " " << param.name << " between " << param.lowerBound << " / " << param.upperBound << endl;
+  cout << "Added systematic " << m_paramIndex[ param.name ] << " " << param.name << " between " << param.lowerBound << " / " << param.upperBound <<
+    " of type " << TypeToString(param) << endl;
 
   ++m_N_systematics; 
 }
@@ -114,6 +158,11 @@ void ComBAT::DefineParameters()
       else if( token == "syst" ) {
 	Systematic syst;
 	cardfile >> syst;
+
+	int type = 0;
+	cardfile >> type;
+	syst.type = (TypeOfSystematic)type;
+	
 	AddSystematic( syst );
       }
       else if( token == "delta" ) {
@@ -123,9 +172,10 @@ void ComBAT::DefineParameters()
 	cout << "Sigma for param " << whichParam << ": ";
 
 	vector< double > delta;
-	for( unsigned int s = 0 ; s < m_N_systematics ; ++s ) {
+	for( unsigned int s = 0 ; s < 2*m_N_systematics ; ++s ) {
 	  double syst = 0.0;
 	  cardfile >> syst;
+
 	  delta.push_back( syst );
 	  cout << " " << syst;
 	}
@@ -183,19 +233,23 @@ double ComBAT::LogLikelihood(std::vector <double> parameters)
 	
 	const double xsec_0      = parameters[ 0 ]; //m_paramIndex["xsec"] ];
 
-	const double Nobs_ele    = GetDataPoint(DATAPOINT::ELE_0)->GetValue( VAL::Nobs );
-	const double Nbkg_ele    = GetDataPoint(DATAPOINT::ELE_0)->GetValue( VAL::Nbkg ) * ( 1 + CalculateTotalVariation("Nbkg_ele", parameters) );
+	const double Nobs_ele      = GetDataPoint(DATAPOINT::ELE_0)->GetValue( VAL::Nobs );
+	const double Nbkg_ele_0    = GetDataPoint(DATAPOINT::ELE_0)->GetValue( VAL::Nbkg );
+	const double Nbkg_ele      = Nbkg_ele_0 * ( 1 + CalculateTotalVariation("Nbkg_ele", parameters, Nbkg_ele_0) );
 	//	const double Nsig_ele_MC = GetDataPoint(DATAPOINT::ELE_0)->GetValue( VAL::NsigMC );
-	const double eff_sig_ele = GetDataPoint(DATAPOINT::ELE_0)->GetValue( VAL::eff_sig ) * ( 1 + CalculateTotalVariation("eff_sig_ele", parameters) );
-	const double iLumi_ele   = GetDataPoint(DATAPOINT::ELE_0)->GetValue( VAL::iLumi );// * ( 1 + CalculateTotalVariation("iLumi", parameters) );
-	const double Nsig_ele    = xsec_0 * iLumi_ele * br * eff_sig_ele;
+	const double eff_sig_ele_0 = GetDataPoint(DATAPOINT::ELE_0)->GetValue( VAL::eff_sig );
+	const double eff_sig_ele   = eff_sig_ele_0 * ( 1 + CalculateTotalVariation("eff_sig_ele", parameters, eff_sig_ele_0) );
+	const double iLumi_ele     = GetDataPoint(DATAPOINT::ELE_0)->GetValue( VAL::iLumi );// * ( 1 + CalculateTotalVariation("iLumi", parameters) );
+	const double Nsig_ele      = xsec_0 * iLumi_ele * br * eff_sig_ele;
 
-	const double Nobs_mu    = GetDataPoint(DATAPOINT::MU_0)->GetValue( VAL::Nobs );
-	const double Nbkg_mu    = GetDataPoint(DATAPOINT::MU_0)->GetValue( VAL::Nbkg ) * ( 1 + CalculateTotalVariation("Nbkg_mu", parameters) );
+	const double Nobs_mu      = GetDataPoint(DATAPOINT::MU_0)->GetValue( VAL::Nobs );
+	const double Nbkg_mu_0    = GetDataPoint(DATAPOINT::MU_0)->GetValue( VAL::Nbkg ); 
+	const double Nbkg_mu      = Nbkg_mu_0 * ( 1 + CalculateTotalVariation("Nbkg_mu", parameters, Nbkg_mu_0) );
 	//	const double Nsig_mu_MC = GetDataPoint(DATAPOINT::MU_0)->GetValue( VAL::NsigMC );
-	const double eff_sig_mu = GetDataPoint(DATAPOINT::MU_0)->GetValue( VAL::eff_sig ) * ( 1 + CalculateTotalVariation("eff_sig_mu", parameters) );
-	const double iLumi_mu   = GetDataPoint(DATAPOINT::MU_0)->GetValue( VAL::iLumi );//  * ( 1 + CalculateTotalVariation("iLumi", parameters) );
-	const double Nsig_mu    = xsec_0 * iLumi_mu * br * eff_sig_mu;
+	const double eff_sig_mu_0 = GetDataPoint(DATAPOINT::MU_0)->GetValue( VAL::eff_sig );
+	const double eff_sig_mu   = eff_sig_mu_0 * ( 1 + CalculateTotalVariation("eff_sig_mu", parameters, eff_sig_mu_0) );
+	const double iLumi_mu     = GetDataPoint(DATAPOINT::MU_0)->GetValue( VAL::iLumi );//  * ( 1 + CalculateTotalVariation("iLumi", parameters) );
+	const double Nsig_mu      = xsec_0 * iLumi_mu * br * eff_sig_mu;
 
 
 	// Poisson likelihood
@@ -236,15 +290,49 @@ double ComBAT::LogAPrioriProbability(std::vector <double> parameters)
 // ---------------------------------------------------------
 
 
-double ComBAT::CalculateTotalVariation( const string& param, std::vector <double>& parameters )
+double ComBAT::CalculateTotalVariation( const string& param, std::vector <double>& parameters, const double& val_0 )
 {
-  double v = 0.;// parameters[0];
+  double v = 0.;// parameters[0];  //parameters[0] = sigma
   //cout << param << ": ";
   m_N_systematics = m_sigma.size();
-  for( unsigned int s = 0 ; s < 1 + m_N_systematics; ++s ) {
-    //const double sign = m_sigma[param][s] / fabs(m_sigma[param][s]);
-    //printf("%1.3f * %3.3f ; ",  m_sigma[param][s], parameters[ s + 1 ] );
-    v += m_sigma[param][s] * parameters[ s + 1 ]; //parameters[0] = sigma
+  for( unsigned int p = 0 ; p < 1 + m_N_systematics; ++p ) {
+    const unsigned int s = 2 * p;
+
+    double delta = 0.0;
+    double a, b, c;
+    double val_m, val_p;
+
+    const double sigma_p = m_sigma[param][s];
+    const double sigma_m = m_sigma[param][s+1];
+
+    switch( m_systematics[s].type ) {
+
+    case Unspecified:
+      delta = 0.0;
+      break;
+    case Symmetric:
+      delta = sigma_p * parameters[ p + 1 ];
+      break;
+    case AsymmetricParabolic:
+      val_m = (1. + sigma_m) * val_0;
+      val_p = (1. - sigma_p) * val_0;
+      FitParabola( val_m, val_0, val_p, &a, &b, &c);
+      delta = c + b*parameters[p+1] + a*pow(parameters[p+1],2);
+      break;
+    case Asymmetric2HalfGaussian:
+      if( parameters[ p + 1 ] > 0. ) {
+	delta = sigma_p * parameters[ p + 1 ] ;
+      }
+      else {
+	delta = -sigma_m * parameters[ p + 1 ] ;
+      }
+      break;
+    default:
+      delta = sigma_p * parameters[ p + 1 ];
+      break;
+    }
+
+    v += delta;
   }
   //cout << endl;
   return v;
