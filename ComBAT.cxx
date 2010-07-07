@@ -34,6 +34,9 @@ string TypeToString( const Systematic& s )
   case Asymmetric2HalfGaussian:
     type = "Asymmetric with 2 half-gaussian interpolation";
     break;
+  case AsymmetricDiscrete:
+    type = "Asymmetric with descrete values";
+    break;
   default:
     type = "Error decoding type of systematic";
     break;
@@ -280,7 +283,14 @@ double ComBAT::LogAPrioriProbability(std::vector <double> parameters)
 	logprob -= log( GetParameter("xsec")->GetRangeWidth() ); // flat a priori on xs
 
 	for( unsigned int s = 1 ; s <= parameters.size() ; ++s ) {
-	  logprob += BCMath::LogGaus( parameters[s] );
+	  const TypeOfSystematic type = m_systematics[s-1].type;
+
+	  if( type == Symmetric || type == AsymmetricParabolic || type == Asymmetric2HalfGaussian ) {
+	    logprob += BCMath::LogGaus( parameters[s] );
+	  }
+	  else {
+	    logprob -= log( GetParameter(s-1)->GetRangeWidth() );
+	  }
 	  //logprob += LogGamma( parameters[s] );
 	}
 
@@ -304,8 +314,8 @@ double ComBAT::CalculateTotalVariation( const string& param, std::vector <double
 
     const double sigma_p = m_sigma[param][s];
     const double sigma_m = m_sigma[param][s+1];
-
-    switch( m_systematics[s].type ) {
+    //cout << "s_p=" << sigma_p << "  s_m=" << sigma_m << endl;
+    switch( m_systematics[p].type ) {
 
     case Unspecified:
       delta = 0.0;
@@ -315,8 +325,9 @@ double ComBAT::CalculateTotalVariation( const string& param, std::vector <double
       break;
     case AsymmetricParabolic:
       val_m = (1. + sigma_m) * val_0;
-      val_p = (1. - sigma_p) * val_0;
+      val_p = (1. + sigma_p) * val_0;
       FitParabola( val_m, val_0, val_p, &a, &b, &c);
+      //cout << a << " " << b << " " << c << " " << endl;
       delta = c + b*parameters[p+1] + a*pow(parameters[p+1],2);
       break;
     case Asymmetric2HalfGaussian:
@@ -326,6 +337,9 @@ double ComBAT::CalculateTotalVariation( const string& param, std::vector <double
       else {
 	delta = -sigma_m * parameters[ p + 1 ] ;
       }
+      break;
+    case AsymmetricDiscrete:
+      delta = sigma_p * parameters[ p + 1 ];
       break;
     default:
       delta = sigma_p * parameters[ p + 1 ];

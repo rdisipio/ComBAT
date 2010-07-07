@@ -12,6 +12,7 @@
 #include <BAT/BCDataSet.h>
 #include <BAT/BCDataPoint.h>
 #include <BAT/BCH1D.h>
+#include <BAT/BCModelOutput.h>
 
 #include "commons.h"
 #include "ComBAT.h"
@@ -35,6 +36,9 @@ int main( int argc, char *argv[] )
 
 	m->SetCardFileName( configFileName );
 	m->DefineParameters();
+
+	//BCModelOutput * o = new BCModelOutput(m,"ComBAT_MarkovChains.root");
+	//o->WriteMarkovChain(true);
 
 	// Add the data point to the data set
 	//cout << "Reading data points from file" << endl;
@@ -67,7 +71,10 @@ int main( int argc, char *argv[] )
 	m -> FindMode( m -> GetBestFitParameters() );
 
 	// draw all marginalized distributions into a PostScript file
-		m -> PrintAllMarginalized("ComBAT_plots.ps");
+	m -> PrintAllMarginalized("ComBAT_plots.ps");
+
+	//o->WriteMarginalizedDistributions();
+	//o->Close();
 
 	// calculate p-value
 	m -> CalculatePValue( m -> GetBestFitParameters() );
@@ -79,12 +86,13 @@ int main( int argc, char *argv[] )
 	}
 
 	// print results of the analysis into a text file
-		m -> PrintResults("ComBAT_results.txt");
+	m -> PrintResults("ComBAT_results.txt");
 
 	// close log file
 	BCLog::CloseLog();
 
-	
+	//delete o;
+	delete m;
 	//delete ch_ele;
 	//delete ch_mu;
 	//delete m;
