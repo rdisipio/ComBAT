@@ -324,9 +324,9 @@ double ComBAT::CalculateTotalVariation( const string& param, std::vector <double
       delta = sigma_p * parameters[ p + 1 ];
       break;
     case AsymmetricParabolic:
-      val_m = (1. + sigma_m) * val_0;
-      val_p = (1. + sigma_p) * val_0;
-      FitParabola( val_m, val_0, val_p, &a, &b, &c);
+      //val_m = (1. + sigma_m) * val_0;
+      //val_p = (1. + sigma_p) * val_0;
+      FitParabola( sigma_m, 0, sigma_p, &a, &b, &c);
       //cout << a << " " << b << " " << c << " " << endl;
       delta = c + b*parameters[p+1] + a*pow(parameters[p+1],2);
       break;

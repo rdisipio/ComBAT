@@ -6,6 +6,8 @@
 // ***************************************************************
 
 #include <string>
+#include <sstream>
+#include <vector>
 
 #include <BAT/BCLog.h>
 #include <BAT/BCAux.h>
@@ -17,12 +19,24 @@
 #include "commons.h"
 #include "ComBAT.h"
 
+std::vector<std::string> &split(const std::string &s, const char delim, std::vector<std::string> &elems) {
+    std::stringstream ss(s);
+    std::string item;
+    while(std::getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+    return elems;
+}
+
+
 int main( int argc, char *argv[] )
 {
   //const string dataFileName   = ( argc > 1 ) ? argv[1]  : "analysis_10TeV.txt" ;
   //const string configFileName = ( argc > 2 ) ? argv[2]  : "combat.ini" ;
   //const unsigned int NParamsToRead = 6;
   const string configFileName = ( argc > 1 ) ? argv[1]  : "combat.bat" ;
+  std::vector<std::string> tokens;
+  split( configFileName, '.', tokens);
 
   // set nice style for drawing than the ROOT default
 	BCAux::SetStyle();
@@ -32,23 +46,13 @@ int main( int argc, char *argv[] )
 	BCLog::SetLogLevel(BCLog::detail);
 
 	// create new ComBAT object
-	ComBAT * m = new ComBAT();
+	ComBAT * m = new ComBAT( tokens[0].c_str() );
 
 	m->SetCardFileName( configFileName );
 	m->DefineParameters();
 
 	//BCModelOutput * o = new BCModelOutput(m,"ComBAT_MarkovChains.root");
 	//o->WriteMarkovChain(true);
-
-	// Add the data point to the data set
-	//cout << "Reading data points from file" << endl;
-        //BCDataSet* dataSet = new BCDataSet(); 
-	//dataSet->ReadDataFromFile( dataFileName.c_str(), NParamsToRead );
-
-	// dataSet->AddDataPoint( ch_ele_0 );
-	//dataSet->AddDataPoint( ch_mu_0 );
-	 
-	//m->SetDataSet( dataSet );
 
 	BCLog::OutSummary("Test model created");
 
@@ -71,7 +75,8 @@ int main( int argc, char *argv[] )
 	m -> FindMode( m -> GetBestFitParameters() );
 
 	// draw all marginalized distributions into a PostScript file
-	m -> PrintAllMarginalized("ComBAT_plots.ps");
+	const string psFileName = tokens[0] + "_plots.ps";
+	m -> PrintAllMarginalized( psFileName.c_str() );
 
 	//o->WriteMarginalizedDistributions();
 	//o->Close();
@@ -86,7 +91,8 @@ int main( int argc, char *argv[] )
 	}
 
 	// print results of the analysis into a text file
-	m -> PrintResults("ComBAT_results.txt");
+	const string txtFileName = tokens[0] + "_results.txt";
+	m -> PrintResults( txtFileName.c_str() );
 
 	// close log file
 	BCLog::CloseLog();
