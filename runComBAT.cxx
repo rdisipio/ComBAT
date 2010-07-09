@@ -51,8 +51,9 @@ int main( int argc, char *argv[] )
 	m->SetCardFileName( configFileName );
 	m->DefineParameters();
 
-	//BCModelOutput * o = new BCModelOutput(m,"ComBAT_MarkovChains.root");
-	//o->WriteMarkovChain(true);
+        string rootFileName = tokens[0] + "_MarkovChains.root";
+	BCModelOutput * o = new BCModelOutput(m, rootFileName.c_str() );
+	o->WriteMarkovChain(true);
 
 	BCLog::OutSummary("Test model created");
 
@@ -78,8 +79,6 @@ int main( int argc, char *argv[] )
 	const string psFileName = tokens[0] + "_plots.ps";
 	m -> PrintAllMarginalized( psFileName.c_str() );
 
-	//o->WriteMarginalizedDistributions();
-	//o->Close();
 
 	// calculate p-value
 	m -> CalculatePValue( m -> GetBestFitParameters() );
@@ -93,6 +92,9 @@ int main( int argc, char *argv[] )
 	// print results of the analysis into a text file
 	const string txtFileName = tokens[0] + "_results.txt";
 	m -> PrintResults( txtFileName.c_str() );
+
+	o->WriteMarginalizedDistributions();
+	o->Close();
 
 	// close log file
 	BCLog::CloseLog();
