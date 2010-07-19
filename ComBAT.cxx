@@ -198,7 +198,12 @@ void ComBAT::DefineParameters()
 	dp->SetValue( 4, eff_bkg );
 	dp->SetValue( 5, ilumi );
 	dataSet->AddDataPoint( dp );
-	cout << "Data point " << Nobs << " " << NsigMC << " " << NbkgMC << " " << eff_sig << " " << eff_bkg << " " << ilumi << endl;
+	cout << "Data point:  Nobs=" << Nobs << " NsigMC=" << NsigMC << " NbkgMC=" << NbkgMC << " eff_s=" << eff_sig 
+	     << " eff_b=" << eff_bkg << " iLumi=" << ilumi << endl;
+	
+	cout << "Calculated xs from MC: " << NsigMC /( eff_sig * ilumi * 0.545 ) << " pb" << endl;
+	cout << "Calculated xs from data: " << (Nobs - NbkgMC) / ( eff_sig * ilumi * 0.545 ) << " pb" << endl;
+	
       }
       else if( token == "end" ) {
 	
@@ -217,6 +222,7 @@ void ComBAT::DefineParameters()
   cout << "End of configuration" << endl;
   cardfile.close();
 
+
 }
 
 // ---------------------------------------------------------
@@ -233,7 +239,7 @@ double ComBAT::LogLikelihood(std::vector <double> parameters)
 
 	/////////////////////////////
 	// Likelihood
-	
+
 	const double xsec_0      = parameters[ 0 ]; //m_paramIndex["xsec"] ];
 
 	const double Nobs_ele      = GetDataPoint(DATAPOINT::ELE_0)->GetValue( VAL::Nobs );
@@ -258,11 +264,11 @@ double ComBAT::LogLikelihood(std::vector <double> parameters)
 	// Poisson likelihood
 	const double mu_ele     = Nsig_ele + Nbkg_ele;
 	const double mu_mu      = Nsig_mu  + Nbkg_mu;
-	//logprob += BCMath::LogPoisson( Nobs_ele, Nsig_ele + Nbkg_ele );
-	//logprob += BCMath::LogPoisson( Nobs_mu,  Nsig_mu + Nbkg_mu );
+	logprob += BCMath::LogPoisson( Nobs_ele, Nsig_ele + Nbkg_ele );
+	logprob += BCMath::LogPoisson( Nobs_mu,  Nsig_mu + Nbkg_mu );
 
-	logprob += log( mu_ele ) * Nobs_ele - mu_ele - BCMath::ApproxLogFact( int(Nobs_ele) );
-	logprob += log( mu_mu )  * Nobs_mu  - mu_mu  - BCMath::ApproxLogFact( int(Nobs_mu) );
+	//logprob += log( mu_ele ) * Nobs_ele - mu_ele - BCMath::ApproxLogFact( int(Nobs_ele) );
+	//logprob += log( mu_mu )  * Nobs_mu  - mu_mu  - BCMath::ApproxLogFact( int(Nobs_mu) );
 
 	//printf("Nobs_ele=%5.0f Nsig_ele=%5.0f Nbkg_ele=%5.0f mu_ele=%5.0f\n", Nobs_ele, Nsig_ele, Nbkg_ele, mu_ele );
 	//printf("Nobs_mu=%5.0f  Nsig_mu=%5.0f  Nbkg_mu=%5.0f  mu_mu=%5.0f logprob=%5.2f\n\n", Nobs_mu, Nsig_mu, Nbkg_mu, mu_mu, logprob );
@@ -304,7 +310,7 @@ double ComBAT::CalculateTotalVariation( const string& param, std::vector <double
 {
   double v = 0.;// parameters[0];  //parameters[0] = sigma
   //cout << param << ": ";
-  m_N_systematics = m_sigma.size();
+  //m_N_systematics = m_sigma.size();
   for( unsigned int p = 0 ; p < 1 + m_N_systematics; ++p ) {
     const unsigned int s = 2 * p;
 
@@ -329,6 +335,8 @@ double ComBAT::CalculateTotalVariation( const string& param, std::vector <double
       FitParabola( sigma_m, 0, sigma_p, &a, &b, &c);
       //cout << a << " " << b << " " << c << " " << endl;
       delta = c + b*parameters[p+1] + a*pow(parameters[p+1],2);
+      //cout << "param " << param << ": a=" << a << " b=" << b << " c=" << c << endl;
+
       break;
     case Asymmetric2HalfGaussian:
       if( parameters[ p + 1 ] > 0. ) {
