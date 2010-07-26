@@ -86,10 +86,10 @@ MYPROGS     = \
         runComBAT
 
 GARBAGE      = $(CXXOBJS) $(EXEOBJS) *.o *~ link.d $(MYPROGS) ConfigFile/ConfigFile.o
-
+TINYXMLOBJ   = TinyXML/tinyxml.o TinyXML/tinyxmlerror.o TinyXML/tinyxmlparser.o TinyXML/tinystr.o
 
 # targets
-all : project
+all : TinyXML project
 
 link.d : $(patsubst %.cxx,%.h,$(CXXSRCS))
 	$(CXX) -MM $(CXXFLAGS) $(CXXSRCS) > link.d;
@@ -102,9 +102,13 @@ include link.d
 clean :
 	$(RM) $(GARBAGE)
 
-project : runComBAT.cxx $(CXXOBJS)
+TinyXML : $(TINYXMLOBJ)
+	@echo Compiling TinyXML
+	cd TinyXML ; make
+
+project : runComBAT.cxx $(CXXOBJS) ComBAT.h $(TINYXMLOBJ)
 	$(CXX) $(CXXFLAGS) -c runComBAT.cxx $(CXXOBJS) #$<
-	$(CXX) $(LDFLAGS) $(LIBS)  runComBAT.o $(CXXOBJS) -o runComBAT	
+	$(CXX) $(LDFLAGS) $(LIBS)  runComBAT.o $(TINYXMLOBJ) $(CXXOBJS) -o runComBAT	
 
 print :
 	echo compiler  : $(CXX)

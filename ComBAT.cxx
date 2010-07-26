@@ -113,7 +113,7 @@ void ComBAT::AddSystematic( const Systematic& param )
   AddParameter( param.name.c_str(), param.lowerBound, param.upperBound ); 
   m_paramIndex[ param.name ] = m_N_systematics + m_N_params;
 
-  cout << "Added systematic " << m_paramIndex[ param.name ] << " " << param.name << " between " << param.lowerBound << " / " << param.upperBound <<
+  cout << "Added systematic " << m_paramIndex[ param.name ] << " " << param.name << " range " << param.lowerBound << " / " << param.upperBound <<
     " of type " << TypeToString(param) << endl;
 
   ++m_N_systematics; 
@@ -125,10 +125,22 @@ void ComBAT::AddParam( const Systematic& param  )
   AddParameter( param.name.c_str(), param.lowerBound, param.upperBound ); 
   m_paramIndex[ param.name ] = m_N_systematics + m_N_params;
   
-  cout << "Added parameter " << m_paramIndex[ param.name ] << " " << param.name << " between " << param.lowerBound << " / " << param.upperBound << endl;
+  cout << "Added parameter " << m_paramIndex[ param.name ] << " " << param.name << " range " << param.lowerBound << " / " << param.upperBound << endl;
   
   ++m_N_params; 
 }
+
+
+void ComBAT::AddSigma( const string& delta, const Systematic& param  )    
+{
+  m_sigma[delta].push_back( param.upperBound );
+  m_sigma[delta].push_back( param.lowerBound );
+
+  const unsigned int size = m_sigma[delta].size();
+  //cout << size << endl;
+  cout << "   sigma_" << param.name << "_up= " << m_sigma[delta][size-2] << " / sigma_" << param.name << "_down = " << m_sigma[delta][size-1] << endl;
+}
+
 
 // ---------------------------------------------------------
 
@@ -136,6 +148,7 @@ void ComBAT::AddParam( const Systematic& param  )
 
 void ComBAT::DefineParameters()
 {
+  /*
 	// Add parameters to your model here.
 	// You can then use them in the methods below by calling the
 	// parameters.at(i) or parameters[i], where i is the index
@@ -222,7 +235,10 @@ void ComBAT::DefineParameters()
   cout << "End of configuration" << endl;
   cardfile.close();
 
-
+*/
+  cout << "Before starting calculation:" << endl;
+  cout << "No. of systematics: " << m_systematics.size() << endl;// m_N_systematics << endl;
+  cout << "No. of data points: " << GetNDataPoints() << endl;
 }
 
 // ---------------------------------------------------------
@@ -311,7 +327,7 @@ double ComBAT::CalculateTotalVariation( const string& param, std::vector <double
   double v = 0.;// parameters[0];  //parameters[0] = sigma
   //cout << param << ": ";
   //m_N_systematics = m_sigma.size();
-  for( unsigned int p = 0 ; p < 1 + m_N_systematics; ++p ) {
+  for( unsigned int p = 0 ; p < 1 + m_systematics.size() /* m_N_systematics */; ++p ) {
     const unsigned int s = 2 * p;
 
     double delta = 0.0;
@@ -320,7 +336,7 @@ double ComBAT::CalculateTotalVariation( const string& param, std::vector <double
 
     const double sigma_p = m_sigma[param][s];
     const double sigma_m = m_sigma[param][s+1];
-    //cout << "s_p=" << sigma_p << "  s_m=" << sigma_m << endl;
+    //cout << m_systematics[p].name << " s_p=" << sigma_p << "  s_m=" << sigma_m << endl;
     switch( m_systematics[p].type ) {
 
     case Unspecified:
