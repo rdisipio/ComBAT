@@ -1,0 +1,60 @@
+<analysis name="baseline">
+<!-- prior = flat, gaus, jeffrey -->
+<param name="xsec"  min="0" max="500" prior="flat">
+   <syst name="JES"      min="-5" max="5" prior="2" /> 
+   <syst name="AcerMC"   min="0"  max="1" prior="4" />
+   <syst name="Wjets"    min="-5" max="5" prior="1" />
+   <syst name="ISR"      min="-5" max="5" prior="2" />
+   <syst name="FSR"      min="-5" max="5" prior="2" />
+   <syst name="QCD"      min="-5" max="5" prior="1" />
+   <syst name="HFW"      min="-5" max="5" prior="1" />
+   <syst name="MCbkg"    min="-5" max="5" prior="1" />
+</param>
+
+<!-- Baseline analysis -->
+<delta name="eff_sig_ele" >
+ <sigma source="JES" up=0.077 down=-0.092 />
+ <sigma source="AcerMC" up=0.169 down=0.000 />
+ <sigma source="Wjets" up=0.000 down=0.000 />
+ <sigma source="ISR" up=0.016 down=-0.077 />
+ <sigma source="FSR" up=-0.063 down=0.039 />
+ <sigma source="QCD" up=0.000 down=0.000 />
+ <sigma source="HFW" up=0.000 down=0.000 />
+ <sigma source="MCbkg" up=0.000 down=0.000 />
+</delta>
+<delta name="eff_sig_mu" >
+ <sigma source="JES" up=0.062 down=-0.074 />
+ <sigma source="AcerMC" up=0.108 down=0.000 />
+ <sigma source="Wjets" up=0.000 down=0.000 />
+ <sigma source="ISR" up=0.034 down=-0.043 />
+ <sigma source="FSR" up=-0.050 down=0.056 />
+ <sigma source="QCD" up=0.000 down=0.000 />
+ <sigma source="HFW" up=0.000 down=0.000 />
+ <sigma source="MCbkg" up=0.000 down=0.000 />
+</delta>
+<delta name="Nbkg_ele" >
+ <sigma source="JES" up=0.000 down=0.000 />
+ <sigma source="AcerMC" up=0.000 down=0.000 />
+ <sigma source="Wjets" up=0.093 down=0.000 />
+ <sigma source="ISR" up=0.000 down=0.000 />
+ <sigma source="FSR" up=0.000 down=0.000 />
+ <sigma source="QCD" up=0.212 down=0.000 />
+ <sigma source="HFW" up=0.201 down=0.000 />
+ <sigma source="MCbkg" up=0.097 down=0.000 />
+</delta>
+<delta name="Nbkg_mu" >
+ <sigma source="JES" up=0.000 down=0.000 />
+ <sigma source="AcerMC" up=0.000 down=0.000 />
+ <sigma source="Wjets" up=0.134 down=0.000 />
+ <sigma source="ISR" up=0.000 down=0.000 />
+ <sigma source="FSR" up=0.000 down=0.000 />
+ <sigma source="QCD" up=0.100 down=0.000 />
+ <sigma source="HFW" up=0.297 down=0.000 />
+ <sigma source="MCbkg" up=0.108 down=0.000 />
+</delta>
+
+
+<data channel="ele" Nobs=104 NsigMC=76.4 NbkgMC=26.9 eff_sig=0.0878 eff_bkg=0. ilumi=10. />
+<data channel="mu"  Nobs=116 NsigMC=77.5 NbkgMC=20.9 eff_sig=0.0890 eff_bkg=0. ilumi=10. />
+
+</analysis>
