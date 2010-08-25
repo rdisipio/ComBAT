@@ -8,6 +8,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <TRandom3.h>
 
 #include <BAT/BCLog.h>
 #include <BAT/BCAux.h>
@@ -69,20 +70,21 @@ int main( int argc, char *argv[] )
 	const string prior = xsec->Attribute("prior");
 
 	if( prior == "gauss" ) {
-
+	  param.type = (TypeOfSystematic)GaussPrior;
+	  
 	}
 	else if( prior == "jeffrey" ) {
-
+	  param.type = (TypeOfSystematic)JeffreyPrior;
 	}
 	else if( prior == "flat" ) {
-	  xsec->Attribute( "min", &param.lowerBound );
-	  xsec->Attribute( "max", &param.upperBound );
+	  param.type = (TypeOfSystematic)FlatPrior;
 	}
 	else {
 	  cout << "Wrong prior " << prior << endl;
 	  exit(1);
 	}
-
+	 xsec->Attribute( "min", &param.lowerBound );
+	 xsec->Attribute( "max", &param.upperBound );
 	//cout << "Found param " << param.name << " " << param.lowerBound << " / " << param.upperBound << " with prior " << prior << endl;
 	m->AddParam( param );
 
@@ -126,37 +128,70 @@ int main( int argc, char *argv[] )
 	// read data points
 	BCDataSet* dataSet = new BCDataSet();
 	for( TiXmlElement * dataXML = analysis.FirstChildElement("data").Element() ; dataXML ; dataXML = dataXML->NextSiblingElement() ) {
-	  BCDataPoint * dp = new BCDataPoint( 6 );
-	  
-	  double Nobs, NsigMC, NbkgMC, eff_sig, eff_bkg, ilumi = 0.0;
-	  dataXML->Attribute( "Nobs",    &Nobs    );
-	  dataXML->Attribute( "NsigMC",  &NsigMC  );
-	  dataXML->Attribute( "NbkgMC",  &NbkgMC  );
-	  dataXML->Attribute( "eff_sig", &eff_sig );
-	  dataXML->Attribute( "eff_bkg", &eff_bkg );
-	  dataXML->Attribute( "ilumi",   &ilumi   );
 
-	  dp->SetValue( 0, Nobs );
-	  dp->SetValue( 1, NsigMC );
-	  dp->SetValue( 2, NbkgMC );
-	  dp->SetValue( 3, eff_sig );
-	  dp->SetValue( 4, eff_bkg );
-	  dp->SetValue( 5, ilumi );
+	  //determine the number of parameters
+	  TiXmlNode * child = 0;
+	  unsigned int nParams = 1;
+	  while( child = ( dataXML->IterateChildren( child )) ) {
+	    ++nParams;
+	  }
+
+	  BCDataPoint * dp = new BCDataPoint( nParams );
+	  
+	  double Nobs, NsigMC, NbkgW, NbkgQCD, NbkgST, NbkgZ, NbkgOthers, W_c_frac, W_b_frac, eff_btag, eff_mistag_c, eff_mistag_lq, eff_sig, ilumi = 0.0;
+
+	  Nobs               = atof( dataXML->FirstChildElement("Nobs")->GetText() ); //Attribute( "Nobs",    &Nobs    );
+	  NsigMC             = atof( dataXML->FirstChildElement("NsigMC")->GetText() );
+	  NbkgW              = atof( dataXML->FirstChildElement("NbkgW")->GetText() );
+	  NbkgQCD            = atof( dataXML->FirstChildElement("NbkgQCD")->GetText() );
+	  NbkgST             = atof( dataXML->FirstChildElement("NbkgST")->GetText() );
+	  NbkgZ              = atof( dataXML->FirstChildElement("NbkgZ")->GetText() );
+	  NbkgOthers         = atof( dataXML->FirstChildElement("NbkgOthers")->GetText() );
+	  W_c_frac           = atof( dataXML->FirstChildElement("W_c_frac")->GetText() );
+	  W_b_frac           = atof( dataXML->FirstChildElement("W_b_frac")->GetText() );
+	  eff_btag           = atof( dataXML->FirstChildElement("eff_btag")->GetText() );
+	  eff_mistag_c       = atof( dataXML->FirstChildElement("eff_mistag_c")->GetText() );
+	  eff_mistag_lq      = atof( dataXML->FirstChildElement("eff_mistag_lq")->GetText() );
+	  eff_sig            = atof( dataXML->FirstChildElement("eff_sig")->GetText() );
+	  ilumi              = atof( dataXML->FirstChildElement("ilumi")->GetText() );
+
+
+	  dp->SetValue( VAL::Nobs, Nobs );
+	  dp->SetValue( VAL::NsigMC, NsigMC );
+	  dp->SetValue( VAL::NbkgW_datadriven, NbkgW );
+	  dp->SetValue( VAL::NbkgQCD_datadriven, NbkgQCD );
+	  dp->SetValue( VAL::NbkgST, NbkgST );
+	  dp->SetValue( VAL::NbkgZ, NbkgZ );
+	  dp->SetValue( VAL::NbkgOthers, NbkgOthers ); 
+	  dp->SetValue( VAL::W_c_frac, W_c_frac );
+	  dp->SetValue( VAL::W_b_frac, W_b_frac );
+	  dp->SetValue( VAL::eff_btag, eff_btag );
+	  dp->SetValue( VAL::eff_mistag_c, eff_mistag_c );
+	  dp->SetValue( VAL::eff_mistag_lq, eff_mistag_lq );
+	  dp->SetValue( VAL::eff_sig, eff_sig );
+	  dp->SetValue( VAL::iLumi, ilumi );
 
 	  dataSet->AddDataPoint( dp );
 
-	  cout << "\nData point:  Nobs=" << Nobs << " NsigMC=" << NsigMC << " NbkgMC=" << NbkgMC << " eff_s=" << eff_sig 
-	     << " eff_b=" << eff_bkg << " iLumi=" << ilumi << endl;
+	  const double calc_eff_btag = ( W_b_frac * + eff_btag ) +  ( W_c_frac * eff_mistag_c ) + ( (1 - W_c_frac - W_b_frac ) * eff_mistag_lq );
+	  const double NbkgW_btag = NbkgW * calc_eff_btag;
+
+	  const double Nbkg = NbkgW_btag + NbkgST + NbkgZ + NbkgQCD + NbkgOthers;
+	  cout << "\nData point:  Nobs=" << Nobs << " NsigMC=" << NsigMC << " NbkgW=" << NbkgW 
+	       << " Nbkg=" << Nbkg << " eff_btag=" << eff_btag
+	       << " eff_s=" << eff_sig << endl;
+	     
 	
 	  cout << "Calculated xs from MC: " << NsigMC /( eff_sig * ilumi * 0.545 ) << " pb" << endl;
-	  cout << "Calculated xs from data: " << (Nobs - NbkgMC) / ( eff_sig * ilumi * 0.545 ) << " pb" << endl << endl;
+	  cout << "Calculated xs from data: " << (Nobs - Nbkg) / ( eff_sig * ilumi * 0.545 ) << " pb" << endl << endl;
 	}
 	m->SetDataSet( dataSet );
 	m->DefineParameters();
 
-        string rootFileName = tokens[0] + "_MarkovChains.root";
-	BCModelOutput * o = new BCModelOutput(m, rootFileName.c_str() );
-	o->WriteMarkovChain(true);
+	string UDHistoFileName = tokens[0] + "_UDHistograms.root";
+	m->SetUserDefinedHistogramFile( UDHistoFileName );
+
+        
 
 	BCLog::OutSummary("Test model created");
 
@@ -168,6 +203,8 @@ int main( int argc, char *argv[] )
 
 	// run MCMC and marginalize posterior wrt. all parameters
 	// and all combinations of two parameters
+	m -> MCMCSetNIterationsBurnIn(10000);
+	m->MCMCGetTRandom3()->SetSeed(21340);
 	m -> MarginalizeAll();
 
 	// run mode finding; by default using Minuit
@@ -186,6 +223,9 @@ int main( int argc, char *argv[] )
 	// calculate p-value
 	m -> CalculatePValue( m -> GetBestFitParameters() );
 
+	string rootFileName = tokens[0] + "_MarkovChains.root";
+	BCModelOutput * o = new BCModelOutput(m, rootFileName.c_str() );
+
 	int npar = m->GetNParameters();
         for (int i=0; i<npar; i++){
           BCParameter * a = m->GetParameter(i);
@@ -196,15 +236,16 @@ int main( int argc, char *argv[] )
 	const string txtFileName = tokens[0] + "_results.txt";
 	m -> PrintResults( txtFileName.c_str() );
 
+	o->WriteMarkovChain(true);
 	o->WriteMarginalizedDistributions();
 	o->Close();
 
 	// close log file
 	BCLog::CloseLog();
 
-	delete cardFile;
+	//delete cardFile;
 	//delete o;
-	delete m;
+	//delete m;
 	//delete ch_ele;
 	//delete ch_mu;
 	//delete m;

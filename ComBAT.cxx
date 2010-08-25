@@ -18,6 +18,27 @@
 
 ////////////////////////////////////////////
 
+string PriorToString( const Systematic& s )
+{
+  string type = "";
+  switch( s.type ) {
+  case FlatPrior:
+    type = "Flat";
+    break;
+  case GaussPrior:
+    type = "Gaussian";
+    break;
+  case JeffreyPrior:
+    type = "Jeffrey's";
+    break;
+  default:
+    type = "Unknown";
+    break;
+  }
+ 
+  return type;
+};
+
 string TypeToString( const Systematic& s )
 {
   string type = "";
@@ -99,6 +120,15 @@ ComBAT::ComBAT(const char * name) : BCModel(name)
 // ---------------------------------------------------------
 ComBAT::~ComBAT()
 {
+  m_h_Nbkg->Write();
+  m_h_Nbkg_conv_poisson->Write();
+  m_histoFile->Close();
+  printf("User-defined histograms saved");
+
+  //delete m_h_Nbkg;
+  //delete m_h_Nbkg_conv_poisson;
+  //delete m_histoFile;
+
   printf("Goodbye");
 }  // default destructor
 
@@ -125,9 +155,11 @@ void ComBAT::AddParam( const Systematic& param  )
   AddParameter( param.name.c_str(), param.lowerBound, param.upperBound ); 
   m_paramIndex[ param.name ] = m_N_systematics + m_N_params;
   
-  cout << "Added parameter " << m_paramIndex[ param.name ] << " " << param.name << " range " << param.lowerBound << " / " << param.upperBound << endl;
+  cout << "Added parameter " << m_paramIndex[ param.name ] << " " << param.name << " range " << param.lowerBound << " / " << param.upperBound
+       << " with prior " << PriorToString(param) << endl;
   
   ++m_N_params; 
+  m_xsec = param;
 }
 
 
@@ -158,90 +190,33 @@ void ComBAT::DefineParameters()
 //	this -> AddParameter("par1", 0.0, 1.0);   // index 0
 //	this -> AddParameter("par2", -7.0, 28.0); // index 1
 
-  BCDataSet* dataSet = new BCDataSet();
-
-  cout << "Opening cardfile " << m_cardFileName << endl;
-  ifstream cardfile( m_cardFileName.c_str(), ifstream::in  );
-  if( cardfile.is_open() ) {
-    string token;
-    while( cardfile >> token ) {
-      //cout << "token " << token << endl;
-      if( token == "param" ) {
-	Systematic param;
-	cardfile >> param;
-	AddParam( param );
-      }
-      else if( token == "syst" ) {
-	Systematic syst;
-	cardfile >> syst;
-
-	int type = 0;
-	cardfile >> type;
-	syst.type = (TypeOfSystematic)type;
-	
-	AddSystematic( syst );
-      }
-      else if( token == "delta" ) {
-	string whichParam = "unsetParam";
-	cardfile >> whichParam;
-
-	cout << "Sigma for param " << whichParam << ": ";
-
-	vector< double > delta;
-	for( unsigned int s = 0 ; s < 2*m_N_systematics ; ++s ) {
-	  double syst = 0.0;
-	  cardfile >> syst;
-
-	  delta.push_back( syst );
-	  cout << " " << syst;
-	}
-	cout << endl;
-	m_sigma[whichParam] = delta;
-      }
-      else if( token == "data" ) {
-	BCDataPoint * dp = new BCDataPoint( 6 );
-	
-	double Nobs, NsigMC, NbkgMC, eff_sig, eff_bkg, ilumi = 0.0;
-	cardfile >> Nobs >> NsigMC >> NbkgMC >> eff_sig >> eff_bkg >> ilumi;
-
-	dp->SetValue( 0, Nobs );
-	dp->SetValue( 1, NsigMC );
-	dp->SetValue( 2, NbkgMC );
-	dp->SetValue( 3, eff_sig );
-	dp->SetValue( 4, eff_bkg );
-	dp->SetValue( 5, ilumi );
-	dataSet->AddDataPoint( dp );
-	cout << "Data point:  Nobs=" << Nobs << " NsigMC=" << NsigMC << " NbkgMC=" << NbkgMC << " eff_s=" << eff_sig 
-	     << " eff_b=" << eff_bkg << " iLumi=" << ilumi << endl;
-	
-	cout << "Calculated xs from MC: " << NsigMC /( eff_sig * ilumi * 0.545 ) << " pb" << endl;
-	cout << "Calculated xs from data: " << (Nobs - NbkgMC) / ( eff_sig * ilumi * 0.545 ) << " pb" << endl;
-	
-      }
-      else if( token == "end" ) {
-	
-	break;
-      }
-      else {
-	cout << "Impossible to parse token " << token << endl;
-	continue;
-      }
-    } // next token
-
-  } // file opened
-
-  SetDataSet( dataSet );
-
-  cout << "End of configuration" << endl;
-  cardfile.close();
 
 */
   cout << "Before starting calculation:" << endl;
   cout << "No. of systematics: " << m_systematics.size() << endl;// m_N_systematics << endl;
   cout << "No. of data points: " << GetNDataPoints() << endl;
+
+  
 }
 
+
 // ---------------------------------------------------------
+
+
+void ComBAT::SetUserDefinedHistogramFile( string filename )
+{
+  m_histoFile = new TFile( filename.c_str(), "recreate" );
+
+  printf("User-defined histograms will be saved in file %s\n", filename.c_str() );
+
+  m_h_Nbkg = new TH1D( "Nbkg", "Number of background events", 31, -0.5, 30 );
+  m_h_Nbkg_conv_poisson = new TH1D( "Nbkg_conv_poisson", "Number of background events convoluted w/ Poisson", 31, -0.5, 30 );
+}
+
+
+// ---------------------------------------------------------
+
+
 double ComBAT::LogLikelihood(std::vector <double> parameters)
 {
 	// This methods returns the logarithm of the conditional probability
@@ -249,50 +224,60 @@ double ComBAT::LogLikelihood(std::vector <double> parameters)
 
 	double logprob  = 0.;
 
-	param_t br      = 0.545;//no full had
-
-
-
 	/////////////////////////////
 	// Likelihood
 
-	const double xsec_0      = parameters[ 0 ]; //m_paramIndex["xsec"] ];
-
-	const double Nobs_ele      = GetDataPoint(DATAPOINT::ELE_0)->GetValue( VAL::Nobs );
-	const double Nbkg_ele_0    = GetDataPoint(DATAPOINT::ELE_0)->GetValue( VAL::Nbkg );
-	const double Nbkg_ele      = Nbkg_ele_0 * ( 1 + CalculateTotalVariation("Nbkg_ele", parameters, Nbkg_ele_0) );
-	//	const double Nsig_ele_MC = GetDataPoint(DATAPOINT::ELE_0)->GetValue( VAL::NsigMC );
-	const double eff_sig_ele_0 = GetDataPoint(DATAPOINT::ELE_0)->GetValue( VAL::eff_sig );
-	const double eff_sig_ele   = eff_sig_ele_0 * ( 1 + CalculateTotalVariation("eff_sig_ele", parameters, eff_sig_ele_0) );
-	const double iLumi_ele     = GetDataPoint(DATAPOINT::ELE_0)->GetValue( VAL::iLumi );// * ( 1 + CalculateTotalVariation("iLumi", parameters) );
-	const double Nsig_ele      = xsec_0 * iLumi_ele * br * eff_sig_ele;
-
-	const double Nobs_mu      = GetDataPoint(DATAPOINT::MU_0)->GetValue( VAL::Nobs );
-	const double Nbkg_mu_0    = GetDataPoint(DATAPOINT::MU_0)->GetValue( VAL::Nbkg ); 
-	const double Nbkg_mu      = Nbkg_mu_0 * ( 1 + CalculateTotalVariation("Nbkg_mu", parameters, Nbkg_mu_0) );
-	//	const double Nsig_mu_MC = GetDataPoint(DATAPOINT::MU_0)->GetValue( VAL::NsigMC );
-	const double eff_sig_mu_0 = GetDataPoint(DATAPOINT::MU_0)->GetValue( VAL::eff_sig );
-	const double eff_sig_mu   = eff_sig_mu_0 * ( 1 + CalculateTotalVariation("eff_sig_mu", parameters, eff_sig_mu_0) );
-	const double iLumi_mu     = GetDataPoint(DATAPOINT::MU_0)->GetValue( VAL::iLumi );//  * ( 1 + CalculateTotalVariation("iLumi", parameters) );
-	const double Nsig_mu      = xsec_0 * iLumi_mu * br * eff_sig_mu;
-
-
 	// Poisson likelihood
-	const double mu_ele     = Nsig_ele + Nbkg_ele;
-	const double mu_mu      = Nsig_mu  + Nbkg_mu;
-	logprob += BCMath::LogPoisson( Nobs_ele, Nsig_ele + Nbkg_ele );
-	logprob += BCMath::LogPoisson( Nobs_mu,  Nsig_mu + Nbkg_mu );
-
-	//logprob += log( mu_ele ) * Nobs_ele - mu_ele - BCMath::ApproxLogFact( int(Nobs_ele) );
-	//logprob += log( mu_mu )  * Nobs_mu  - mu_mu  - BCMath::ApproxLogFact( int(Nobs_mu) );
-
-	//printf("Nobs_ele=%5.0f Nsig_ele=%5.0f Nbkg_ele=%5.0f mu_ele=%5.0f\n", Nobs_ele, Nsig_ele, Nbkg_ele, mu_ele );
-	//printf("Nobs_mu=%5.0f  Nsig_mu=%5.0f  Nbkg_mu=%5.0f  mu_mu=%5.0f logprob=%5.2f\n\n", Nobs_mu, Nsig_mu, Nbkg_mu, mu_mu, logprob );
-
+	logprob += MarginalLikelihood( DATAPOINT::ELE_0, parameters );
+	logprob += MarginalLikelihood( DATAPOINT::MU_0, parameters );
+	
 	return logprob;
 }
 
+
 // ---------------------------------------------------------
+
+
+double ComBAT::MarginalLikelihood( nparam_t datapoint, const std::vector <double>& parameters )
+{
+  m_Nbkg = 0.;
+  string ch   = ( datapoint == DATAPOINT::ELE_0 ) ? "ele" : "mu";  
+  BCDataPoint* data = GetDataPoint(datapoint);
+
+  const double xsec_0        = parameters[ 0 ]; //m_paramIndex["xsec"] ];
+  const double br            = 0.545;
+
+  const double Nobs          = data->GetValue( VAL::Nobs );
+
+  const double f_b           = data->GetValue( VAL::W_b_frac )      * ( 1 + CalculateTotalVariation( "f_b", parameters) );
+  const double f_c           = data->GetValue( VAL::W_c_frac )      * ( 1 + CalculateTotalVariation( "f_c", parameters) );
+  const double eff_b         = data->GetValue( VAL::eff_btag )      * ( 1 + CalculateTotalVariation( "eff_b", parameters) );
+  const double eff_mistag_c  = data->GetValue( VAL::eff_mistag_c )  * ( 1 + CalculateTotalVariation( "eff_mistag_c", parameters) );
+  const double eff_mistag_lq = data->GetValue( VAL::eff_mistag_lq ) * ( 1 + CalculateTotalVariation( "eff_mistag_lq", parameters) );
+  const double eff_btag      = ( f_b * + eff_b ) +  ( f_c * eff_mistag_c ) + ( (1 - f_c - f_b ) * eff_mistag_lq ); 
+	                            
+  const double NW_0      = data->GetValue( VAL::NbkgW_datadriven);
+  const double NW_b      = NW_0 * eff_btag;
+	
+  const double NbkgQCD    = data->GetValue( VAL::NbkgQCD_datadriven) * ( 1 + CalculateTotalVariation( "NbkgQCD_" + ch, parameters) );
+  const double NbkgST     = data->GetValue( VAL::NbkgST)             * ( 1 + CalculateTotalVariation( "NbkgST_" + ch, parameters) );
+  const double NbkgZ      = data->GetValue( VAL::NbkgZ)              * ( 1 + CalculateTotalVariation( "NbkgZ_" + ch, parameters) );
+  const double NbkgOthers = data->GetValue( VAL::NbkgOthers)         * ( 1 + CalculateTotalVariation( "NbkgOthers_" + ch, parameters) );
+  m_Nbkg       = NW_b + NbkgQCD + NbkgST + NbkgZ + NbkgOthers;
+  const double Nbkg = m_Nbkg;
+
+  const double eff_sig   = data->GetValue( VAL::eff_sig ) * ( 1 + CalculateTotalVariation( "eff_sig_" + ch , parameters ) );
+  const double iLumi     = data->GetValue( VAL::iLumi ) * ( 1 + CalculateTotalVariation("ilumi", parameters) );
+  const double Nsig      = xsec_0 * iLumi * br * eff_sig;
+
+  //logprob += log( mu_mu )  * Nobs_mu  - mu_mu  - BCMath::ApproxLogFact( int(Nobs_mu) );
+  //printf("Nobs_ele=%5.0f Nsig_ele=%5.0f Nbkg_ele=%5.0f mu_ele=%5.0f\n", Nobs_ele, Nsig_ele, Nbkg_ele, mu_ele );
+  return BCMath::LogPoisson( Nobs, Nsig + Nbkg );
+}
+
+// ---------------------------------------------------------
+
+
 double ComBAT::LogAPrioriProbability(std::vector <double> parameters)
 {
 	// This method returns the logarithm of the prior probability for the
@@ -302,8 +287,17 @@ double ComBAT::LogAPrioriProbability(std::vector <double> parameters)
 
 	// For flat prior it's very easy.
 //	for(unsigned int i=0; i < this -> GetNParameters(); i++)
-	logprob -= log( GetParameter("xsec")->GetRangeWidth() ); // flat a priori on xs
 
+	if( m_xsec.type == FlatPrior ) {
+	  logprob -= log( GetParameter("xsec")->GetRangeWidth() ); // flat a priori on xs
+	}
+	else if( m_xsec.type == GaussPrior ) { 
+	  logprob += BCMath::LogGaus( parameters[0], GetParameter("xsec")->GetRangeWidth()/2., GetParameter("xsec")->GetRangeWidth()/4. );
+	}
+	else if( m_xsec.type == JeffreyPrior ) {
+	  logprob += 0;
+	}
+	
 	for( unsigned int s = 1 ; s <= parameters.size() ; ++s ) {
 	  const TypeOfSystematic type = m_systematics[s-1].type;
 
@@ -319,10 +313,12 @@ double ComBAT::LogAPrioriProbability(std::vector <double> parameters)
 
 	return logprob;
 }
+
+
 // ---------------------------------------------------------
 
 
-double ComBAT::CalculateTotalVariation( const string& param, std::vector <double>& parameters, const double& val_0 )
+double ComBAT::CalculateTotalVariation( string param, const std::vector <double>& parameters ) 
 {
   double v = 0.;// parameters[0];  //parameters[0] = sigma
   //cout << param << ": ";
@@ -332,7 +328,7 @@ double ComBAT::CalculateTotalVariation( const string& param, std::vector <double
 
     double delta = 0.0;
     double a, b, c;
-    double val_m, val_p;
+    //double val_m, val_p;
 
     const double sigma_p = m_sigma[param][s];
     const double sigma_m = m_sigma[param][s+1];
@@ -374,4 +370,13 @@ double ComBAT::CalculateTotalVariation( const string& param, std::vector <double
   }
   //cout << endl;
   return v;
+}
+
+
+// ---------------------------------------------------------
+
+void ComBAT::MCMCUserIterationInterface()
+{
+  m_h_Nbkg->Fill( m_Nbkg );
+
 }

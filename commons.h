@@ -29,14 +29,44 @@ namespace DATAPOINT {
 };
 
 namespace VAL {
-  nparam_t Nobs    = 0;
-  nparam_t NsigMC  = 1;
-  nparam_t Nbkg    = 2;
-  nparam_t eff_sig = 3;
-  nparam_t eff_bkg = 4;
-  nparam_t iLumi   = 5;
+  enum QUANTITY {
+    Nobs, 
+    NsigMC, 
+    NbkgW_datadriven,
+    NbkgQCD_datadriven,
+    NbkgST,
+    NbkgZ,
+    NbkgOthers,
+    W_c_frac,
+    W_b_frac,
+    eff_btag,
+    eff_mistag_c,
+    eff_mistag_lq,
+    eff_sig,
+    eff_bkg,
+    iLumi
+  };
 };
 
+/*
+namespace VAL {
+  nparam_t Nobs    = 0;
+  nparam_t NsigMC  = 1;
+  nparam_t NbkgW_datadriven = 2;
+  nparam_t NbkgQCD_datadriven = 3;
+  nparam_t NbkgST;
+  nparam_t NbkgZ;
+  nparam_t NbkgOthers;
+  nparam_t W_c_frac = 4;
+  nparam_t W_b_frac = 5;
+  nparam_t eff_btag = 6;
+  nparam_t eff_mistag_c = 7;
+  nparam_t eff_mistag_lq = 8;
+  nparam_t eff_sig = 9;
+  nparam_t eff_bkg = 10;
+  nparam_t iLumi   = 11;
+};
+*/
 
 namespace PARAM {
   nparam_t xsec        = 0;
