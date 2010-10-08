@@ -22,6 +22,8 @@
 #include "commons.h"
 #include "ComBAT.h"
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 std::vector<std::string> &split(const std::string &s, const char delim, std::vector<std::string> &elems) {
     std::stringstream ss(s);
     std::string item;
@@ -30,6 +32,34 @@ std::vector<std::string> &split(const std::string &s, const char delim, std::vec
     }
     return elems;
 }
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+TypeOfSystematic StringToShape( const string& shape )
+{
+  if( shape == "Symmetric" )               return Symmetric;
+  if( shape == "AsymmetricParabolic" )     return AsymmetricParabolic;
+  if( shape == "Asymmetric2HalfGaussian" ) return Asymmetric2HalfGaussian;
+  if( shape == "AsymmetricDiscrete" )      return AsymmetricDiscrete;
+  else return Unspecified;
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+TypeOfPrior StringToPrior( const string& prior )
+{
+  if( prior == "Flat" )                return FlatPrior;
+  else if( prior == "Gaussian" )       return GaussPrior;
+  else if( prior == "Gamma" )          return GammaPrior;
+  else if( prior == "ScaledPoisson" )  return ScaledPoissonPrior;
+  else if( prior == "Jeffreys" )       return JeffreysPrior;
+  else return UnspecifiedPrior;
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 int main( int argc, char *argv[] )
@@ -69,15 +99,18 @@ int main( int argc, char *argv[] )
 
 	const string prior = xsec->Attribute("prior");
 
-	if( prior == "gauss" ) {
-	  param.type = (TypeOfSystematic)GaussPrior;
+	if( prior == "Gauss" ) {
+	  param.prior = (TypeOfPrior)GaussPrior;
 	  
 	}
-	else if( prior == "jeffrey" ) {
-	  param.type = (TypeOfSystematic)JeffreyPrior;
+	else if( prior == "Jeffreys" ) {
+	  param.prior = (TypeOfPrior)JeffreysPrior;
 	}
-	else if( prior == "flat" ) {
-	  param.type = (TypeOfSystematic)FlatPrior;
+	else if( prior == "Flat" ) {
+	  param.prior = (TypeOfPrior)FlatPrior;
+	}
+	else if( prior == "Gamma" ) {
+	  param.prior = (TypeOfPrior)GammaPrior;
 	}
 	else {
 	  cout << "Wrong prior " << prior << endl;
@@ -97,9 +130,22 @@ int main( int argc, char *argv[] )
 	  systXML->Attribute("min", &syst.lowerBound );
 	  systXML->Attribute("max", &syst.upperBound );
 	  
-	  int tos = 0;
-	  systXML->QueryIntAttribute( "prior", &tos );
-	  syst.type = (TypeOfSystematic)tos;
+	  
+	  const string prior = systXML->Attribute("prior");
+	  syst.prior = StringToPrior( prior ); 
+	  
+	  const string shape = systXML->Attribute("shape");
+	  if( shape.size() > 0 ) syst.shape = StringToShape( shape );
+
+	  
+	  if( syst.prior == GammaPrior || syst.prior == GaussPrior ) {
+	    double s = 0;
+	    systXML->Attribute("sigma", &s );
+	    syst.params["sigma"] = s;
+	    //cout << "sigma = " << syst.params["sigma"] << endl;
+	  }
+
+	  syst.description = systXML->Attribute("description");
 
 	  m->AddSystematic( syst );
 	} // end loop over xsec/syst
@@ -114,6 +160,9 @@ int main( int argc, char *argv[] )
 
 	  for( TiXmlElement * sourceXML = deltaXML->FirstChildElement("sigma") ; sourceXML ; sourceXML = sourceXML->NextSiblingElement() ) {
 	    Systematic source;
+	    
+	    source.lowerBound = 0;
+	    source.upperBound = 0;
 
 	    source.name = sourceXML->Attribute("source");
 	    sourceXML->Attribute( "up",     &source.upperBound );
@@ -174,10 +223,14 @@ int main( int argc, char *argv[] )
 	  dataSet->AddDataPoint( dp );
 
 	  const double calc_eff_btag = ( W_b_frac * + eff_btag ) +  ( W_c_frac * eff_mistag_c ) + ( (1 - W_c_frac - W_b_frac ) * eff_mistag_lq );
-	  const double NbkgW_btag = NbkgW * calc_eff_btag;
+	  const double NbkgW_btag = NbkgW;// * calc_eff_btag;
+
+	  const double Ngen = 160. * ilumi * 0.545;
+	  eff_sig           = NsigMC / Ngen;
+	  //const double 
 
 	  const double Nbkg = NbkgW_btag + NbkgST + NbkgZ + NbkgQCD + NbkgOthers;
-	  cout << "\nData point:  Nobs=" << Nobs << " NsigMC=" << NsigMC << " NbkgW=" << NbkgW 
+	  cout << "\nData point:  Nobs=" << Nobs << " NsigMC=" << NsigMC << " NbkgW_btag=" << NbkgW_btag << " calc_eff_btag=" << calc_eff_btag 
 	       << " Nbkg=" << Nbkg << " eff_btag=" << eff_btag
 	       << " eff_s=" << eff_sig << endl;
 	     
@@ -191,7 +244,8 @@ int main( int argc, char *argv[] )
 	string UDHistoFileName = tokens[0] + "_UDHistograms.root";
 	m->SetUserDefinedHistogramFile( UDHistoFileName );
 
-        
+        string rootFileName = tokens[0] + "_MarkovChains.root";
+	BCModelOutput * o = new BCModelOutput(m, rootFileName.c_str() );
 
 	BCLog::OutSummary("Test model created");
 
@@ -205,7 +259,9 @@ int main( int argc, char *argv[] )
 	// and all combinations of two parameters
 	m -> MCMCSetNIterationsBurnIn(10000);
 	m->MCMCGetTRandom3()->SetSeed(21340);
+        m->MCMCSetNIterationsRun( 300000 );
 	m -> MarginalizeAll();
+
 
 	// run mode finding; by default using Minuit
 //	m -> FindMode();
@@ -218,26 +274,27 @@ int main( int argc, char *argv[] )
 	// draw all marginalized distributions into a PostScript file
 	const string psFileName = tokens[0] + "_plots.ps";
 	m -> PrintAllMarginalized( psFileName.c_str() );
-
+	
+	o->WriteMarkovChain(true);
+	o->WriteMarginalizedDistributions();
 
 	// calculate p-value
 	m -> CalculatePValue( m -> GetBestFitParameters() );
-
-	string rootFileName = tokens[0] + "_MarkovChains.root";
-	BCModelOutput * o = new BCModelOutput(m, rootFileName.c_str() );
 
 	int npar = m->GetNParameters();
         for (int i=0; i<npar; i++){
           BCParameter * a = m->GetParameter(i);
 	  std::cout << " 95% C.L. ----> " << m->GetMarginalized(a)->GetQuantile(0.95) << std::endl;
 	}
+	
 
 	// print results of the analysis into a text file
 	const string txtFileName = tokens[0] + "_results.txt";
 	m -> PrintResults( txtFileName.c_str() );
 
-	o->WriteMarkovChain(true);
-	o->WriteMarginalizedDistributions();
+	m->SaveUserDefinedHistograms();
+	
+	
 	o->Close();
 
 	// close log file

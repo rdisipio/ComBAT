@@ -15,6 +15,7 @@
    <syst name="FSR"      min="-5" max="5" prior="2" />
    <syst name="QCD"      min="-2" max="5" prior="1" />
    <syst name="lumi"     min="-5" max="5" prior="1" />
+   <syst name="test"     min="0" max="20" prior="5" sigma=3. />
 </param>
 
 <!-- Baseline analysis -->
@@ -151,7 +152,7 @@
 <delta name="NbkgW_ele" >
  <sigma source="JES"    up=0. down=0. />
  <sigma source="AcerMC" up=0. down=0. />
- <sigma source="Wjets"  up=0.4 down=0. />
+ <sigma source="Wjets"  up=0.5 down=0. />
  <sigma source="Wbfrac" up=0. down=0. />
  <sigma source="Wbeff"  up=0. down=0. />
  <sigma source="Wcfrac" up=0. down=0. />
@@ -168,7 +169,7 @@
 <delta name="NbkgW_mu" >
  <sigma source="JES"    up=0. down=0. />
  <sigma source="AcerMC" up=0. down=0. />
- <sigma source="Wjets"  up=0.4 down=0. />
+ <sigma source="Wjets"  up=0.5 down=0. />
  <sigma source="Wbfrac" up=0. down=0. />
  <sigma source="Wbeff"  up=0. down=0. />
  <sigma source="Wcfrac" up=0. down=0. />
@@ -248,39 +249,39 @@
  <sigma source="lumi"   up=0.1 down=0. />
 </delta>
 
-<delta name="NbkgZ_ele" >
- <sigma source="JES"    up=0. down=0. />
- <sigma source="AcerMC" up=0. down=0. />
- <sigma source="Wjets"  up=0. down=0. />
- <sigma source="Wbfrac" up=0. down=0. />
- <sigma source="Wbeff"  up=0. down=0. />
- <sigma source="Wcfrac" up=0. down=0. />
- <sigma source="Wceff"  up=0. down=0. />
- <sigma source="Wlqeff" up=0. down=0. />
- <sigma source="Norm"   up=0. down=0. />
- <sigma source="ISR"    up=0. down=0. />
- <sigma source="FSR"    up=0. down=0. />
- <sigma source="QCD"    up=0. down=0. />
- <sigma source="lumi"   up=0. down=0. />
-</delta>
-
-<delta name="NbkgZ_mu" >
- <sigma source="JES"    up=0. down=0. />
- <sigma source="AcerMC" up=0. down=0. />
- <sigma source="Wjets"  up=0. down=0. />
- <sigma source="Wbfrac" up=0. down=0. />
- <sigma source="Wbeff"  up=0. down=0. />
- <sigma source="Wcfrac" up=0. down=0. />
- <sigma source="Wceff"  up=0. down=0. />
- <sigma source="Wlqeff" up=0. down=0. />
- <sigma source="Norm"   up=0. down=0. />
- <sigma source="ISR"    up=0. down=0. />
- <sigma source="FSR"    up=0. down=0. />
- <sigma source="QCD"    up=0. down=0. />
- <sigma source="lumi"   up=0. down=0. />
-</delta>
-
 <delta name="NbkgOthers_ele" >
+ <sigma source="JES"    up=0. down=0. />
+ <sigma source="AcerMC" up=0. down=0. />
+ <sigma source="Wjets"  up=0. down=0. />
+ <sigma source="Wbfrac" up=0. down=0. />
+ <sigma source="Wbeff"  up=0. down=0. />
+ <sigma source="Wcfrac" up=0. down=0. />
+ <sigma source="Wceff"  up=0. down=0. />
+ <sigma source="Wlqeff" up=0. down=0. />
+ <sigma source="Norm"   up=0. down=0. />
+ <sigma source="ISR"    up=0. down=0. />
+ <sigma source="FSR"    up=0. down=0. />
+ <sigma source="QCD"    up=0. down=0. />
+ <sigma source="lumi"   up=0. down=0. />
+</delta>
+
+<delta name="NbkgOthers_mu" >
+ <sigma source="JES"    up=0. down=0. />
+ <sigma source="AcerMC" up=0. down=0. />
+ <sigma source="Wjets"  up=0. down=0. />
+ <sigma source="Wbfrac" up=0. down=0. />
+ <sigma source="Wbeff"  up=0. down=0. />
+ <sigma source="Wcfrac" up=0. down=0. />
+ <sigma source="Wceff"  up=0. down=0. />
+ <sigma source="Wlqeff" up=0. down=0. />
+ <sigma source="Norm"   up=0. down=0. />
+ <sigma source="ISR"    up=0. down=0. />
+ <sigma source="FSR"    up=0. down=0. />
+ <sigma source="QCD"    up=0. down=0. />
+ <sigma source="lumi"   up=0. down=0. />
+</delta>
+
+<delta name="NbkgZ_ele" >
  <sigma source="JES"    up=0.16 down=-0.23 />
  <sigma source="AcerMC" up=0. down=0. />
  <sigma source="Wjets"  up=0. down=0. />
@@ -296,7 +297,7 @@
  <sigma source="lumi"   up=0.1 down=0. />
 </delta>
 
-<delta name="NbkgOthers_mu" >
+<delta name="NbkgZ_mu" >
  <sigma source="JES"    up=0.10 down=-0.04 />
  <sigma source="AcerMC" up=0. down=0. />
  <sigma source="Wjets"  up=0. down=0. />
@@ -314,38 +315,37 @@
 
 
 
-
 <data channel="ele" > 
    <Nobs>18</Nobs> 
-   <NsigMC>0</NsigMC>
-   <NbkgW>24.9</NbkgW>
+   <NsigMC>13.96</NsigMC>
+   <NbkgW>25.5</NbkgW>
    <NbkgQCD>1.1</NbkgQCD>
-   <NbkgST>0.74</NbkgST>
-   <NbkgZ>0</NbkgZ>
-   <NbkgOthers>0.12</NbkgOthers>
+   <NbkgST>0.79</NbkgST>
+   <NbkgZ>0.19</NbkgZ>
+   <NbkgOthers>0.0</NbkgOthers>
    <W_c_frac>0.23</W_c_frac>
    <W_b_frac>0.07</W_b_frac>
    <eff_btag>0.50</eff_btag>
    <eff_mistag_c>0.10</eff_mistag_c>
    <eff_mistag_lq>0.02</eff_mistag_lq>
-   <eff_sig>0.084</eff_sig>
+   <eff_sig>0.0798</eff_sig>
    <ilumi>2.</ilumi>
 </data>
 
 <data channel="mu" > 
-   <Nobs>16</Nobs> 
-   <NsigMC>0</NsigMC>
-   <NbkgW>27.8</NbkgW>
+   <Nobs>19</Nobs> 
+   <NsigMC>15.00</NsigMC>
+   <NbkgW>30.8</NbkgW>
    <NbkgQCD>0.4</NbkgQCD>
-   <NbkgST>0.74</NbkgST>
-   <NbkgZ>0</NbkgZ>
-   <NbkgOthers>0.11</NbkgOthers>
+   <NbkgST>0.75</NbkgST>
+   <NbkgZ>0.12</NbkgZ>
+   <NbkgOthers>0.0</NbkgOthers>
    <W_c_frac>0.23</W_c_frac>
    <W_b_frac>0.07</W_b_frac>
    <eff_btag>0.50</eff_btag>
    <eff_mistag_c>0.10</eff_mistag_c>
    <eff_mistag_lq>0.02</eff_mistag_lq>
-   <eff_sig>0.076</eff_sig>
+   <eff_sig>0.0858</eff_sig>
    <ilumi>2.</ilumi>
 </data>
 

@@ -11,7 +11,7 @@ typedef const double       syst_t;
 using namespace std;
 
 
-typedef map< const string, vector< double > > SigmaArray;
+//typedef map< const string, vector< double > > SigmaArray;
 
 
 ///////////////////////////////////////////
