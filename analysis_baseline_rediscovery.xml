@@ -1,0 +1,157 @@
+<analysis name="baseline_rediscovery">
+<!-- prior = flat, gaus, jeffrey -->
+<param name="xsec"  min="50" max="500" prior="Flat">
+   <syst name="LUMI"      min="-5" max="5" prior="Gaussian" shape="Symmetric" sigma=0.11 description="" />
+   <syst name="BTAGEFF"   min="-5" max="5" prior="Gaussian" shape="AsymmetricParabolic" sigma=0.15 description="" /> 
+   <syst name="CTAGEFF"   min="-3" max="5" prior="Gaussian" shape="Symmetric" sigma=0.30 description="" />
+   <syst name="LTAGEFF"   min="-2" max="5" prior="Gaussian" shape="Symmetric" sigma=0.50 description="" />
+   <syst name="JES"       min="-5" max="5" prior="Gaussian" shape="AsymmetricParabolic" sigma=0.10 description="" />
+   <syst name="EES"       min="-5" max="5" prior="Gaussian" shape="Symmetric" sigma=0.03 description="" /> 
+   <syst name="MES"       min="-5" max="5" prior="Gaussian" shape="Symmetric" sigma=0.03 description="" /> 
+   <syst name="ESF"       min="-5" max="5" prior="Gaussian" shape="Symmetric" sigma=0.03 description="" /> 
+   <syst name="MSF"       min="-5" max="5" prior="Gaussian" shape="Symmetric" sigma=0.03 description="" /> 
+   <syst name="IFSR"      min="-5" max="5" prior="Gaussian" shape="AsymmetricParabolic" sigma=0.10 description="" /> 
+   <syst name="NLOGEN"    min="-5" max="5" prior="Gaussian" shape="Symmetric" sigma=0.03 description="" /> 
+   <syst name="PSGEN"     min="-5" max="5" prior="Gaussian" shape="Symmetric" sigma=0.01 description="" /> 
+   <syst name="PDF"       min="-5" max="5" prior="Gaussian" shape="Symmetric" sigma=0.03 description="" /> 
+   <syst name="PILEUP"    min="-5" max="5" prior="Gaussian" shape="Symmetric" sigma=0.03 description="" /> 
+   <syst name="ZXSEC"     min="-1" max="1" prior="Gaussian" shape="Symmetric" sigma=1.00 description="" /> 
+   <syst name="STXS"      min="-1" max="1" prior="Gaussian" shape="Symmetric" sigma=0.10 description="" /> 
+   <syst name="WBGSTATE"  min="0"  max="5" prior="Gamma"    shape="Symmetric" sigma=0.266 description="" /> 
+   <syst name="WBGSTATM"  min="0"  max="5" prior="Gamma"    shape="Symmetric" sigma=0.222 description="" /> 
+   <syst name="WBGSYST"   min="-5" max="5" prior="Gaussian" shape="Symmetric" sigma=0.23 description="" /> 
+   <syst name="QCDSYSTE"  min="-5" max="5" prior="Gaussian" shape="Symmetric" sigma=0.40 description="" /> 
+   <syst name="QCDSYSTM"  min="-5" max="5" prior="Gaussian" shape="Symmetric" sigma=0.40 description="" /> 
+   <syst name="W2TAGSTAT" min="0"  max="5" prior="Gamma"    shape="Symmetric" sigma=0.29 description="" /> 
+   <syst name="WHFRAC"    min="0" max="5" prior="Gamma" shape="Symmetric" sigma=0.33 description="" /> 
+</param>
+
+<!-- Baseline analysis -->
+
+<!-- Electron channel -->
+
+<delta name="NsigMC_ele" >
+   <sigma source="ESF"     up=0.031 /> 
+   <sigma source="BTAGEFF" up=0.106 down=0.106/> 
+  <sigma source="CTAGEFF" up=0.006 />
+  <sigma source="LTAGEFF" up=0.011 />
+  <sigma source="JES"     up=0.112 down=-0.125 />
+
+   <sigma source="EES"     up=0.014 /> 
+   <sigma source="IFSR"    up=0.062 down=-0.113 /> 
+   <sigma source="NLOGEN"  up=0.033 /> 
+   <sigma source="PSGEN"   up=-0.011 /> 
+   <sigma source="PDF"     up=0.025 /> 
+   <sigma source="PILEUP"  up=0.025 /> 
+</delta>
+
+<delta name="NbkgQCD_ele" >
+  <sigma source="QCDSYSTE" up=0.56 /> 
+</delta>
+
+<delta name="NbkgW_ele" >
+   <sigma source="WBGSTATE"  up=0.26 /> 
+   <sigma source="WBGSYST"   up=0.24 /> 
+   <sigma source="W2TAGSTAT" up=0.29 /> 
+   <sigma source="WHFRAC"    up=0.33 /> 
+   <sigma source="QCDSYSTE"  up=0.40  /> 
+</delta>
+
+<delta name="NbkgZ_ele" >
+   <sigma source="ZXSEC"   up=1.00 /> 
+  <sigma source="LUMI"    up=0.11 />
+  <sigma source="JES"     up=0.25 down=0.25 />
+  <sigma source="LTAGEFF" up=0.27 />
+</delta>
+
+<delta name="NbkgST_ele" >
+   <sigma source="STXS"    up=0.10 /> 
+
+ <sigma source="LUMI"    up=0.11 /> 
+ <sigma source="JES"     up=0.20 down=0.20 />
+  <sigma source="BTAGEFF" up=0.11 down=0.11 /> 
+</delta>
+
+
+<!-- Muon channel -->
+
+<delta name="NsigMC_mu" >
+   <sigma source="MSF"     up=0.023 /> 
+   <sigma source="BTAGEFF" up=0.092 down=-0.104 />  
+  <sigma source="CTAGEFF" up=0.006 />
+  <sigma source="LTAGEFF" up=0.010 />
+   <sigma source="JES"     up=0.091 down=-0.106 /> 
+
+   <sigma source="MES"     up=0 /> 
+   <sigma source="IFSR"    up=0.083 down=-0.078 /> 
+   <sigma source="NLOGEN"  up=0.043 /> 
+   <sigma source="PSGEN"   up=-0.026 /> 
+   <sigma source="PDF"     up=0.025 /> 
+   <sigma source="PILEUP"  up=0.025 /> 
+</delta>
+
+<delta name="NbkgQCD_mu" >
+   <sigma source="QCDSYSTM" up=0.63 /> 
+</delta>
+
+<delta name="NbkgW_mu" >
+   <sigma source="WBGSTATM"  up=0.21 /> 
+   <sigma source="WBGSYST"   up=0.24 /> 
+   <sigma source="W2TAGSTAT" up=0.29 /> 
+   <sigma source="WHFRAC"    up=0.33 /> 
+   <sigma source="QCDSYSTM"  up=0.16  /> 
+</delta>
+
+<delta name="NbkgZ_mu" >
+   <sigma source="ZXSEC"   up=1.00 /> 
+   <sigma source="LUMI"    up=0.11 />  
+   <sigma source="JES"     up=0.25 down=0.16 /> 
+
+  <sigma source="LTAGEFF" up=0.28 />
+</delta>
+
+<delta name="NbkgST_mu" >
+   <sigma source="STXS"    up=0.10 /> 
+    <sigma source="LUMI"    up=0.11 /> 
+    <sigma source="JES"     up=0.16 down=0.16 /> 
+    <sigma source="BTAGEFF" up=0.11 down=0.11 /> 
+</delta>
+
+
+<!-- Data -->
+
+<data channel="ele" > 
+   <Nobs>17</Nobs> 
+   <NsigMC>14.54</NsigMC>
+   <NbkgW>1.5</NbkgW>
+   <NbkgQCD>5.0</NbkgQCD>
+   <NbkgST>0.67</NbkgST>
+   <NbkgZ>0.14</NbkgZ>
+   <NbkgOthers>0.0</NbkgOthers>
+   <W_c_frac>0.23</W_c_frac>
+   <W_b_frac>0.07</W_b_frac>
+   <eff_btag>0.50</eff_btag>
+   <eff_mistag_c>0.10</eff_mistag_c>
+   <eff_mistag_lq>0.02</eff_mistag_lq>
+   <eff_sig>0.0798</eff_sig>
+   <ilumi>2.8</ilumi>
+</data>
+
+<data channel="mu" > 
+   <Nobs>20</Nobs> 
+   <NsigMC>14.76</NsigMC>
+   <NbkgW>2.6</NbkgW>
+   <NbkgQCD>0.8</NbkgQCD>
+   <NbkgST>0.66</NbkgST>
+   <NbkgZ>0.08</NbkgZ>
+   <NbkgOthers>0.0</NbkgOthers>
+   <W_c_frac>0.23</W_c_frac>
+   <W_b_frac>0.07</W_b_frac>
+   <eff_btag>0.50</eff_btag>
+   <eff_mistag_c>0.10</eff_mistag_c>
+   <eff_mistag_lq>0.02</eff_mistag_lq>
+   <eff_sig>0.0858</eff_sig>
+   <ilumi>2.8</ilumi>
+</data>
+
+</analysis>
