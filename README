@@ -1,0 +1,28 @@
+### Requirements to use the package: BAT-0.3.2 properly installed
+From atlasbo1 add in .bashrc:
+export BATINSTALLDIR=/usr/local
+export LD_LIBRARY_PATH=/opt/sw/lcg/external/root/5.27.02/slc4_amd64_gcc34/root/lib:$BATINSTALLDIR/lib
+export CPATH=$CPATH:$BATINSTALLDIR/include
+
+Installation and running:
+> tar -zxvf TopComb.tgz
+> make
+> ./runTopComb
+
+
+runTopComb.cxx    -> steering program
+                     here you can choose the input control cards (see below)
+                     to select the channels to combine (leton+jets or 
+                     dilepton or both)
+TopComb.cxx, .h   -> BAT standard class which define run parameters 
+                     loglikelihoods and priors   
+InputData.cxx, .h -> Class to manage the input from card file 
+ljets.cards       -> example of card file for lepton+jets (e/mu channels) 
+                     combination
+dilep.cards       -> example of card file for dilepton (ee/mumu/emu channels) 
+                     combination
+ljets_dilep.cards -> example of card file for lepton+jets + dilepton
+                     combination
+TopComb_plots.ps  -> output plots 
+
+

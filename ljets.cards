@@ -1,0 +1,93 @@
+#### parameter to estimate
+<Measure>              xsec
+
+### prior of the parameter: 0->flat 1->gauss 
+<Measure-prior>         0
+
+### integration limits
+<Measure-lim>          0. 500.
+
+### parameters of the prior (only used for gaussian): mean and sigma
+<Measure-par>          150. 75.
+
+
+### likelihood type: 1->poisson  2->gauss
+<Likelihood>           1
+
+
+### parameters of the likelihood
+<Parameters>           QCD   WJET  Z STOP  Eff   Lumi  Br
+
+--+ tag0
+### Data 
+<Data>                 Nobs
+### Data value
+<Data-value>           17
+
+### Values of the parameters
+<Parameters-values>    4.78 1.9 0.15 0.67 0.0575 2.9 0.545
+
+### Nuisance parameters (NP), same name for NP on different data set means 100% correlation
+<Syst>       QCDSYSTE   QCDSTATE WBGSTATE  WBGSYST W2TAGSTAT BTAGEFF  CTAGEFF  LTAGEFF   WHFRAC  WCFRAC   ZXSEC    LUMI       JES          JER        JRECO      STXS     EID      EES     EER      IFSR      NLOGEN    PSGEN     PDF       OTX
+### Integration limits for NP
+###<Syst>       QCDSYSTE   QCDSTATE WBGSTATE  WBGSYST W2TAGSTAT BTAGEFF  CTAGEFF  LTAGEFF   WHFRAC  WCFRAC   ZXSEC    LUMI       JES          JER        JRECO      STXS     EID      EES     EER      IFSR      NLOGEN    PSGEN     PDF       OTX
+<Syst-lim>      -2.7 3      0  20    0 20     -3.8 8    0  20    -5 8     -8 8    -3.55 8    0 20    -8 8   -1.66 8    -8 8      -4 8         -8 8        -8 8      -8 8     -8 8     -8 8    -8 8      -8 8       -8 8     -8 8     -8 8      -8 8 
+### NPs values for the different parameters 
+### -> pair of parameters for each NP, only the first one used for flat or symm. prior
+###<Syst>       QCDSYSTE   QCDSTATE WBGSTATE  WBGSYST W2TAGSTAT BTAGEFF  CTAGEFF  LTAGEFF   WHFRAC  WCFRAC   ZXSEC    LUMI       JES          JER        JRECO      STXS     EID      EES     EER      IFSR      NLOGEN    PSGEN     PDF       OTX
+<Syst-QCD>     0.37 -0.37  0.54  0.  0.   0.  0.   0.  0.  0.   0.   0.   0.  0.  0.   0.   0.  0.   0. 0.   0.  0.  0.   0.   0.    0.      0.   0.     0.   0.   0.   0.  0.  0.  0.   0.  0.   0.  0.   0.    0.   0.   0.  0.   0.  0.    0.  0.
+###<Syst>       QCDSYSTE   QCDSTATE WBGSTATE  WBGSYST W2TAGSTAT BTAGEFF  CTAGEFF  LTAGEFF   WHFRAC  WCFRAC   ZXSEC    LUMI       JES          JER        JRECO      STXS     EID      EES     EER      IFSR      NLOGEN    PSGEN     PDF       OTX
+<Syst-WJET>   -0.34  0.34  0.    0.  0.20 0.  0.25 0.  0.29 0.   0.  0.  0.   0.  0.   0.   0.29 0.  0. 0.   0.  0.  0.   0.   0.    0.      0.   0.     0.   0.   0.   0.  0.  0.  0.   0.  0.   0.  0.   0.    0.   0.   0.  0.   0.  0.    0.  0.
+###<Syst>       QCDSYSTE   QCDSTATE WBGSTATE  WBGSYST W2TAGSTAT BTAGEFF  CTAGEFF  LTAGEFF   WHFRAC  WCFRAC   ZXSEC    LUMI       JES          JER        JRECO      STXS     EID      EES     EER      IFSR      NLOGEN    PSGEN     PDF       OTX
+<Syst-Z>       0.    0.    0.   0.   0.   0.  0.   0.  0.   0.   0.  0.  0.   0.  0.27 0.   0.   0.  0. 0.   0.6  0. 0.11 0.  0.25  0.      0.   0.      0.   0.    0.   0.  0.  0.   0.  0.  0.   0.  0.   0.   0.   0.   0.  0.   0.  0.    0.  0.
+###<Syst>       QCDSYSTE   QCDSTATE WBGSTATE  WBGSYST W2TAGSTAT BTAGEFF  CTAGEFF  LTAGEFF   WHFRAC  WCFRAC   ZXSEC    LUMI       JES          JER        JRECO      STXS     EID      EES     EER      IFSR      NLOGEN    PSGEN     PDF       OTX
+<Syst-STOP>    0.    0.    0.   0.   0.   0.  0.   0. 0.   0.   0.12 0.  0.   0.  0.   0.   0.   0.  0. 0.   0.  0.  0.11 0.  0.20  0.      0.   0.     0.   0.   0.1  0.   0.  0.   0.  0.  0.   0.  0.   0.    0.   0.   0.  0.   0.  0.    0.  0.
+###<Syst>       QCDSYSTE   QCDSTATE WBGSTATE  WBGSYST W2TAGSTAT BTAGEFF  CTAGEFF  LTAGEFF   WHFRAC  WCFRAC   ZXSEC    LUMI       JES          JER        JRECO      STXS     EID      EES     EER      IFSR      NLOGEN    PSGEN     PDF       OTX
+<Syst-Eff>      0.    0.   0.   0.   0.   0.  0.   0. 0.   0.   0.11 0.  0.   0.  0.005 0.  0.   0.  0. 0.   0.  0.   0.  0. 0.10  0.  0.0001 -0.01 0.0001 -0.08  0.  0.  0.03 0.  0.017 0. 0.  0.  0.06 -0.11 0.044 0.  0.011 0. 0.025 0.  0.01 0.
+###<Syst>       QCDSYSTE   QCDSTATE WBGSTATE  WBGSYST W2TAGSTAT BTAGEFF  CTAGEFF  LTAGEFF   WHFRAC  WCFRAC   ZXSEC    LUMI       JES          JER        JRECO      STXS     EID      EES     EER      IFSR      NLOGEN    PSGEN     PDF       OTX
+<Syst-Lumi>     0.    0.   0.   0.   0.   0.  0.   0. 0.   0.   0.   0.  0.   0.  0.   0.   0.   0.  0. 0.   0.  0.   0.11 0.  0.    0.      0.   0.     0.   0.    0.   0.  0.  0.   0.  0.  0.  0.   0.   0.    0.   0.  0.  0.   0.  0.    0.  0.
+###<Syst>       QCDSYSTE   QCDSTATE WBGSTATE  WBGSYST W2TAGSTAT BTAGEFF  CTAGEFF  LTAGEFF   WHFRAC  WCFRAC   ZXSEC    LUMI       JES          JER        JRECO      STXS     EID      EES     EER      IFSR      NLOGEN    PSGEN     PDF       OTX
+<Syst-Br>       0.    0.   0.   0.   0.   0.  0.   0. 0.   0.   0.   0.  0.   0.  0.   0.   0.   0.  0. 0.   0.  0.   0.   0.  0.    0.      0.   0.     0.   0.    0.   0.  0.  0.   0.  0.  0.  0.   0.   0.    0.   0.  0.  0.   0.  0.    0.  0.
+###Syst-Prior = 0->cost  1->gauss 2->Gamma  -1->not considered
+--+ tag1
+###<Syst>       QCDSYSTE   QCDSTATE WBGSTATE  WBGSYST W2TAGSTAT BTAGEFF  CTAGEFF  LTAGEFF   WHFRAC  WCFRAC   ZXSEC    LUMI       JES          JER        JRECO      STXS     EID      EES     EER      IFSR      NLOGEN    PSGEN     PDF       OTX
+<Syst-Prior>       1           2       2         1       2         1        1        1        2       1        1       1          1            1           1          1       1        1       1         1         1         1        1         1
+--+ tag2
+<EndDataSet>
+--+ tag3
+
+
+--+ tag0
+### Next data set
+<Data>                 Nobs
+<Data-value>            20
+
+### Values of the parameters
+<Parameters-values>    0.765 3.2 0.08 0.68 0.0580 2.9 0.545
+### Nuisance parameters (NP), same name for NP on different data set means 100% correlation
+<Syst>       QCDSYSTM   QCDSTATM WBGSTATM  WBGSYST W2TAGSTAT BTAGEFF  CTAGEFF  LTAGEFF   WHFRAC  WCFRAC   ZXSEC    LUMI       JES          JER        JRECO      STXS     MID      MES     MER      IFSR      NLOGEN    PSGEN     PDF       OTX
+### Integration limits for NP
+###<Syst>       QCDSYSTM   QCDSTATM WBGSTATM  WBGSYST W2TAGSTAT BTAGEFF  CTAGEFF  LTAGEFF   WHFRAC  WCFRAC   ZXSEC    LUMI       JES          JER        JRECO      STXS     MID      MES     MER      IFSR      NLOGEN    PSGEN     PDF       OTX
+<Syst-lim>      -1.78 8      0  20    0 20    -3.8 8    0  20    -5 8      -8 8    -3.55 8    0 20    -8 8    -1.66 8   -8 8      -4 8         -8 8        -8 8      -8 8     -8 8     -8 8    -8 8      -8 8       -8 8     -8 8     -8 8      -8 8 
+### NPs values for the different parameters 
+### -> pair of parameters for each NP, only the first one used for flat or symm. prior
+###<Syst>       QCDSYSTM   QCDSTATM WBGSTATM  WBGSYST W2TAGSTAT BTAGEFF  CTAGEFF  LTAGEFF   WHFRAC  WCFRAC   ZXSEC    LUMI       JES          JER        JRECO      STXS     MSF      MES     MER      IFSR      NLOGEN    PSGEN     PDF       OTX
+<Syst-QCD>     0.56 -0.56  0.35  0.  0.   0.  0.   0.  0.  0.   0.   0.   0.  0.  0.   0.   0.  0.   0. 0.   0.  0.  0.   0.   0.    0.      0.   0.     0.   0.   0.   0.  0.  0.  0.   0.  0.   0.  0.   0.    0.   0.   0.  0.   0.  0.    0.  0.
+###<Syst>       QCDSYSTM   QCDSTATM WBGSTATM  WBGSYST W2TAGSTAT BTAGEFF  CTAGEFF  LTAGEFF   WHFRAC  WCFRAC   ZXSEC    LUMI       JES          JER        JRECO      STXS     MID      MES     MER      IFSR      NLOGEN    PSGEN     PDF       OTX
+<Syst-WJET>   -0.12  0.12  0.    0.  0.22 0.  0.25 0.  0.29 0.   0.  0.  0.   0.  0.   0.   0.29 0.  0. 0.   0.  0.  0.   0.   0.    0.      0.   0.     0.   0.   0.   0.  0.  0.  0.   0.  0.   0.  0.   0.    0.   0.   0.  0.   0.  0.    0.  0.
+###<Syst>       QCDSYSTM   QCDSTATM WBGSTATM  WBGSYST W2TAGSTAT BTAGEFF  CTAGEFF  LTAGEFF   WHFRAC  WCFRAC   ZXSEC    LUMI       JES          JER        JRECO      STXS     MID      MES     MER      IFSR      NLOGEN    PSGEN     PDF       OTX
+<Syst-Z>       0.    0.    0.   0.   0.   0.  0.   0.  0.   0.   0.  0.  0.   0.  0.28 0.   0.   0.  0. 0.   0.6  0. 0.11 0.  0.25  0.      0.   0.      0.   0.    0.   0.  0.  0.   0.  0.  0.   0.  0.   0.   0.   0.   0.  0.   0.  0.    0.  0.
+###<Syst>       QCDSYSTM   QCDSTATM WBGSTATM  WBGSYST W2TAGSTAT BTAGEFF  CTAGEFF  LTAGEFF   WHFRAC  WCFRAC   ZXSEC    LUMI       JES          JER        JRECO      STXS     MID      MES     MER      IFSR      NLOGEN    PSGEN     PDF       OTX
+<Syst-STOP>    0.    0.    0.   0.   0.   0.  0.   0. 0.   0.   0.12 0.  0.   0.  0.   0.   0.   0.  0. 0.   0.  0.  0.11 0.  0.15  0.      0.   0.     0.   0.   0.1  0.   0.  0.   0.  0.  0.   0.  0.   0.    0.   0.   0.  0.   0.  0.    0.  0.
+###<Syst>       QCDSYSTM   QCDSTATM WBGSTATM  WBGSYST W2TAGSTAT BTAGEFF  CTAGEFF  LTAGEFF   WHFRAC  WCFRAC   ZXSEC    LUMI       JES          JER        JRECO      STXS     MID      MES     MER      IFSR      NLOGEN    PSGEN     PDF       OTX
+<Syst-Eff>      0.    0.   0.   0.   0.   0.  0.   0. 0.   0.   0.11 0.  0.   0.  0.005 0.  0.   0.  0. 0.   0.  0.   0.  0. 0.095 0.  0.0001 -0.01 0.0001 -0.08  0.  0.  0.023 0. 0.003 0. 0.005 0. 0.08 0.    0.056 0. 0.026 0. 0.024 0.   0.01 0.
+###<Syst>       QCDSYSTM   QCDSTATM WBGSTATM  WBGSYST W2TAGSTAT BTAGEFF  CTAGEFF  LTAGEFF   WHFRAC  WCFRAC   ZXSEC    LUMI       JES          JER        JRECO      STXS     MID      MES     MER      IFSR      NLOGEN    PSGEN     PDF       OTX
+<Syst-Lumi>     0.    0.   0.   0.   0.   0.  0.   0. 0.   0.   0.   0.  0.   0.  0.   0.   0.   0.  0. 0.   0.  0.   0.11 0.  0.    0.      0.   0.     0.   0.    0.   0.  0.  0.   0.  0.  0.  0.   0.   0.    0.   0.  0.  0.   0.  0.    0.  0.
+###<Syst>       QCDSYSTM   QCDSTATM WBGSTATM  WBGSYST W2TAGSTAT BTAGEFF  CTAGEFF  LTAGEFF   WHFRAC  WCFRAC   ZXSEC    LUMI       JES          JER        JRECO      STXS     MID      MES     MER      IFSR      NLOGEN    PSGEN     PDF       OTX
+<Syst-Br>       0.    0.   0.   0.   0.   0.  0.   0. 0.   0.   0.   0.  0.   0.  0.   0.   0.   0.  0. 0.   0.  0.   0.   0.  0.    0.      0.   0.     0.   0.    0.   0.  0.  0.   0.  0.  0.  0.   0.   0.    0.   0.  0.  0.   0.  0.    0.  0.
+###Syst-Prior = 0->cost  1->gauss 2->Gamma  -1->not considered
+--+ tag1
+###<Syst>       QCDSYSTM   QCDSTATE WBGSTATE  WBGSYST W2TAGSTAT BTAGEFF  CTAGEFF  LTAGEFF   WHFRAC  WCFRAC   ZXSEC    LUMI       JES          JER        JRECO      STXS     MID      MES     MER      IFSR      NLOGEN    PSGEN     PDF       OTX
+<Syst-Prior>       1           2       2         1       2         1        1        1        2       1        1       1          1            1           1          1       1        1       1         1         1         1        1         1
+--+ tag2
+<EndDataSet>
