@@ -1,11 +1,10 @@
 ### Requirements to use the package: BAT-0.3.2 properly installed
-From atlasbo1 add in .bashrc:
-export BATINSTALLDIR=/usr/local
-export LD_LIBRARY_PATH=/opt/sw/lcg/external/root/5.27.02/slc4_amd64_gcc34/root/lib:$BATINSTALLDIR/lib
-export CPATH=$CPATH:$BATINSTALLDIR/include
+Set the following environment variables:
+BATINSTALLDIR   -> full path to the BAT installation directory 
+LD_LIBRARY_PATH -> ROOT lib directory and $BATINSTALLDIR/lib
+CPATH           -> $CPATH and $BATINSTALLDIR/include
 
-Installation and running:
-> tar -zxvf TopComb.tgz
+Running:
 > make
 > ./runTopComb
 
@@ -24,5 +23,6 @@ dilep.cards       -> example of card file for dilepton (ee/mumu/emu channels)
 ljets_dilep.cards -> example of card file for lepton+jets + dilepton
                      combination
 TopComb_plots.ps  -> output plots 
+
 
 
