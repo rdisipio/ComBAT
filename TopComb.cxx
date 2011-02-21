@@ -410,6 +410,8 @@ bool TopComb::CheckforNegativeValues()
 
 void TopComb::MCMCUserIterationInterface()
 {
+  // temporary for run separate sources of errors
+  //  return;
   MCMCrun();
   if(!CheckforNegativeValues()){
     //   cout << " negative!!! " << endl; 
@@ -445,6 +447,7 @@ void TopComb::MCMCUserIterationInterface()
   hnbgstm->Fill(Nbgst_m);
   hnbgzm->Fill(Nbgz_m);
   hxsec->Fill(MCMCGetx().at(0));
+  /*
   hQCDSYSTE->Fill(MCMCGetx().at(1));
   hQCDSTATE->Fill(MCMCGetx().at(2));
   hWBGSTATE->Fill(MCMCGetx().at(3));
@@ -475,6 +478,7 @@ void TopComb::MCMCUserIterationInterface()
   hMID->Fill(MCMCGetx().at(28));
   hMES->Fill(MCMCGetx().at(29));
   hMER->Fill(MCMCGetx().at(30));
+  */
   //  if(testg > 5 || testg2 > 5)cout << " user " << testg << " " << testg2 << endl;
 }
 vector<TH2D*> TopComb::Gethistos2()

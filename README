@@ -1,28 +1,26 @@
-### Requirements to use the package: BAT-0.3.2 properly installed
-Set the following environment variables:
-BATINSTALLDIR   -> full path to the BAT installation directory 
-LD_LIBRARY_PATH -> ROOT lib directory and $BATINSTALLDIR/lib
-CPATH           -> $CPATH and $BATINSTALLDIR/include
+- To use the program BAT should be installed (see instructions
+  and documentation at http://www.mppmu.mpg.de/bat/ )
 
-Running:
-> make
-> ./runTopComb
+- To modify input control cards and run parameters edit runTopComb.cxx
+    
+    choose control cards:
+    TopComb * m = new TopComb("full2010_ljets_tagged.txt");
 
+    number of iterations:
+    m->MCMCSetNIterationsRun(100000);
 
-runTopComb.cxx    -> steering program
-                     here you can choose the input control cards (see below)
-                     to select the channels to combine (leton+jets or 
-                     dilepton or both)
-TopComb.cxx, .h   -> BAT standard class which define run parameters 
-                     loglikelihoods and priors   
-InputData.cxx, .h -> Class to manage the input from card file 
-ljets.cards       -> example of card file for lepton+jets (e/mu channels) 
-                     combination
-dilep.cards       -> example of card file for dilepton (ee/mumu/emu channels) 
-                     combination
-ljets_dilep.cards -> example of card file for lepton+jets + dilepton
-                     combination
-TopComb_plots.ps  -> output plots 
+for details on other parameter settings see the BAT manual:
+http://www.mppmu.mpg.de/bat/
 
+- run the program:
+  > make
+  > ./runTopComb
 
+- list of available control cards 
+full2010_ljets_tagged.txt
+full2010_ljets_pretagged.txt
 
+- output: 
+  TopComb_plots.ps
+  contains the posterior distributions of all parameters
+  (cross section and systematic uncertainties) and their correlations.

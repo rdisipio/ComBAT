@@ -30,10 +30,9 @@ int main()
 	BCLog::SetLogLevel(BCLog::detail);
 
 	// create new TopComb object
-	// choose input cards
-	TopComb * m = new TopComb("ljets_dilep.cards");
-	//	TopComb * m = new TopComb("ljets.cards");
-	//	TopComb * m = new TopComb("dilep.cards");
+	TopComb * m = new TopComb("full2010_ljets_tagged.txt");
+	//	TopComb * m = new TopComb("update_3.txt");
+	//	TopComb * m = new TopComb("test.txt");
          
 	// run settings
         m->MCMCSetNIterationsBurnIn(10000);
@@ -80,7 +79,6 @@ int main()
           //	m -> Normalize();
 
    	  // run MCMC and marginalize posterior wrt. all parameters
-	  // and all combinations of two parameters
           m->MCMCGetTRandom3()->SetSeed(12345);
 	  //          m->Normalize();
 	  m -> MarginalizeAll();
@@ -92,10 +90,6 @@ int main()
           double limm =  m->GetMarginalized(a)->GetMedian() - m->GetMarginalized(a)->GetQuantile(0.16);
           double limp =  m->GetMarginalized(a)->GetQuantile(0.84) - m->GetMarginalized(a)->GetMedian();
 
-          int niter = m->MCMCGetNIterationsConvergenceGlobal();
-
-	  nobs_pois.clear();
-            
 	  //	  std::cout << " maximum ---> " << max  << std::endl;
 	  std::cout << " mean   ----> " << mean << std::endl;
 	  std::cout << " median ----> " << median << " +" << limp << " -" << limm << std::endl;
@@ -109,23 +103,11 @@ int main()
 	  // starting point of Minuit minimization
 //	  m -> FindMode( m -> GetBestFitParameters() );
 
-          //	  m->FindMode();
-          //          m->LikeXsec();
+//---->	  m->FindMode();
+//---->   m->LikeXsec();
 	  // draw all marginalized distributions into a PostScript file
 	  m -> PrintAllMarginalized("TopComb_plots.ps");
 
-  	  // save histograms in root file
-          //  TH2D* h01;
-	  TH1D* h0=m->GetMarginalized(m->GetParameter(1))->GetHistogram();
-	  TH1D* h1=m->GetMarginalized(m->GetParameter(2))->GetHistogram();
-          //TH2D* h01=m->GetMarginalized(m->GetParameter(0),m->GetParameter(1))->GetHistogram();
-	  h0->SetName("h0");
-	  h0->SetTitle("MMSTATE");
-	  h1->SetName("h1");
-	  h1->SetTitle("MMSTATM");
-          //h01->SetName("h01");
-          //h01->SetTitle("xsec vs Jes");
-	  // calculate p-value
 //	  m -> CalculatePValue( m -> GetBestFitParameters() );
 
 	  // print results of the analysis into a text file
